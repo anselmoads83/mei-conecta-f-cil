@@ -35,8 +35,8 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 
-// TODO: Update with the real WhatsApp number (E.164, digits only).
-const WHATSAPP_NUMBER = "5511999999999";
+// Número WhatsApp: (11) 98330-2016
+const WHATSAPP_NUMBER = "5511983302016";
 const WHATSAPP_MSG = encodeURIComponent(
   "Olá Anselmo! Vim pela landing page e gostaria de uma orientação sobre meu MEI."
 );
