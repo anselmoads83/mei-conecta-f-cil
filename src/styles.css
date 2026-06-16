@@ -4,6 +4,35 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@theme {
+  --font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif;
+  --color-graphite: #111111;
+  --color-cta: #cbff1f;
+  --color-cta-hover: #b8e818;
+  --color-gray-soft: #e5e7eb;
+  --color-gray-mid: #6b7280;
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@utility animate-fade-up {
+  animation: fade-up 0.7s ease-out both;
+}
+
+@utility container-x {
+  width: 100%;
+  max-width: 1200px;
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+}
+
+html { scroll-behavior: smooth; }
+body { font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
+
+
 /*
  * Design system definition.
  *
