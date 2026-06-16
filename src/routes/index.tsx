@@ -20,7 +20,7 @@ import {
   Mail,
   Phone,
 } from "lucide-react";
-import anselmoPhoto from "@/assets/anselmo-dias.jpg";
+import anselmoPhoto from "@/assets/anselmo-dias.jpg.asset.json";
 import {
   Accordion,
   AccordionContent,
