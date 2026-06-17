@@ -387,10 +387,6 @@ function InstagramSection() {
             >
               <Instagram className="h-5 w-5 text-[#cbff1f] mb-4" />
               <div className="font-semibold">{t}</div>
-              <div className="mt-3 text-xs text-white/50 flex items-center gap-1.5">
-                Ver conteúdo
-                <ArrowRight className="h-3 w-3 group-hover:translate-x-1 transition-transform" />
-              </div>
             </div>
           ))}
         </div>
