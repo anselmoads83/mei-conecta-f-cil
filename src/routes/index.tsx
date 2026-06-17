@@ -186,7 +186,7 @@ function Header() {
 function Hero() {
   const badges = [
     "Especialista em MEI",
-    "Atendimento em Todo Brasil",
+    "Atendimento em todo Brasil",
     "Suporte Humanizado",
     "Orientação Inicial Gratuita",
   ];
@@ -751,7 +751,7 @@ function FinalCTA() {
   const reinforcements = [
     "Atendimento Online",
     "Orientação Inicial Gratuita",
-    "Atendimento em Todo Brasil",
+    "Atendimento em todo Brasil",
   ];
   return (
     <section className="py-20 md:py-28 bg-[#cbff1f] relative overflow-hidden">
