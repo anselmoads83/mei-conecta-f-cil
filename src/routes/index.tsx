@@ -375,7 +375,7 @@ function InstagramSection() {
             @anselmodiascontador
           </span>
           <h2 className="text-3xl md:text-5xl font-bold tracking-tight leading-[1.1]">
-            Conteúdo gratuito para quem é MEI
+            Conteúdo gratuito para o MEI
           </h2>
         </div>
 
