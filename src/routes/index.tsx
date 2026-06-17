@@ -494,7 +494,7 @@ function Differentials() {
     { icon: MessageCircle, title: "Linguagem Simples", desc: "Sem juridiquês, direto ao ponto." },
     { icon: MapPin, title: "Atendimento Nacional", desc: "Online para todo o Brasil." },
     { icon: ShieldCheck, title: "Transparência", desc: "Valores e prazos sempre claros." },
-    { icon: Briefcase, title: "Experiência Prática", desc: "Anos resolvendo casos reais de MEI." },
+    { icon: Briefcase, title: "Experiência Prática", desc: "Há anos resolvendo casos reais de MEI." },
   ];
   return (
     <section className="py-20 md:py-28 bg-[#111111] text-white">
