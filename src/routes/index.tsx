@@ -41,7 +41,7 @@ const WHATSAPP_MSG = encodeURIComponent(
   "Olá Anselmo! Vim pela landing page e gostaria de uma orientação sobre meu MEI."
 );
 const waLink = `https://wa.me/${WHATSAPP_NUMBER}?text=${WHATSAPP_MSG}`;
-const instagramLink = "https://instagram.com/anselmodiascontador";
+const instagramLink = "https://www.instagram.com/anselmodiascontador/";
 
 export const Route = createFileRoute("/")({
   head: () => ({
