@@ -207,11 +207,9 @@ function Hero() {
             </span>{" "}
             ou pendências?
           </h1>
-          <p className="mt-6 text-lg text-[#6b7280] leading-relaxed max-w-xl">
-            Descubra gratuitamente como regularizar sua situação antes que os
-            problemas aumentem. Orientação para regularização do MEI,
-            parcelamento de débitos, DASN-SIMEI, NF-e e muito mais.
-          </p>
+          <div className="mt-6 text-lg text-[#6b7280] leading-relaxed max-w-xl">
+            BRASIL
+          </div>
           <p className="mt-3 text-sm font-medium text-[#111111]">
             Atendimento online para todo o Brasil.
           </p>
