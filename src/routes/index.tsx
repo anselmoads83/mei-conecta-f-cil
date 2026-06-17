@@ -327,7 +327,8 @@ function About() {
           </h2>
           <div className="mt-6 space-y-4 text-[#6b7280] leading-relaxed">
             <p>
-              Sou contador, empreendedor e sócio da <strong className="text-[#111111]">Target Gestão Contábil</strong>.
+              Sou contador, empreendedor e sócio da <strong className="text-[#111111]">Target Gestão Contábil</strong>.&nbsp;
+              <br />
               Ao longo da minha trajetória, já ajudei centenas de microempreendedores
               a regularizar seus negócios, evitar multas e manter seus CNPJs em dia.
             </p>
