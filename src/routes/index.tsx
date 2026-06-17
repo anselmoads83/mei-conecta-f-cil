@@ -208,7 +208,7 @@ function Hero() {
             ou pendências?
           </h1>
           <div className="mt-6 text-lg text-[#6b7280] leading-relaxed max-w-xl">
-            BRASIL
+            <br />
           </div>
           <p className="mt-3 text-sm font-medium text-[#111111]">
             Atendimento online para todo o Brasil.
