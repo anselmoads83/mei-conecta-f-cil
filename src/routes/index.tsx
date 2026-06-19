@@ -185,7 +185,7 @@ function Header() {
 /* ---------------------------------- Hero --------------------------------- */
 
 function Hero() {
-  const badges = [
+  const features = [
     "Especialista em MEI",
     "Atendimento em todo o Brasil",
     "Suporte Humanizado",
@@ -196,8 +196,8 @@ function Hero() {
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(60%_50%_at_50%_0%,rgba(203,255,31,0.15),transparent_70%)]" />
       <div className="container-x grid lg:grid-cols-[1.1fr_1fr] gap-12 lg:gap-16 py-16 md:py-24 items-center">
         <div className="animate-fade-up">
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#111111]/10 bg-white px-3 py-1.5 text-xs font-medium text-[#6b7280] mb-6">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#cbff1f]" />
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#111111]/10 bg-white px-3 py-1.5 text-xs font-medium text-[#111111] mb-6">
+            <span className="h-2 w-2 rounded-full bg-[#cbff1f]" />
             Contador especialista em MEI
           </div>
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-[1.05] text-[#111111]">
@@ -208,10 +208,7 @@ function Hero() {
             </span>{" "}
             ou pendências?
           </h1>
-          <div className="mt-6 text-lg text-[#6b7280] leading-relaxed max-w-xl">
-            <br />
-          </div>
-          <p className="mt-3 text-sm font-medium text-[#111111]">
+          <p className="mt-6 text-lg text-[#6b7280] leading-relaxed">
             Atendimento online para todo o Brasil.
           </p>
 
@@ -224,11 +221,20 @@ function Hero() {
             </CtaButton>
           </div>
 
-          <ul className="mt-8 flex flex-wrap gap-x-5 gap-y-2">
-            {badges.map((b) => (
-              <li key={b} className="flex items-center gap-2 text-sm text-[#111111]">
-                <CheckCircle2 className="h-4 w-4 text-[#111111]" strokeWidth={2.5} />
-                {b}
+          <ul className="mt-8 space-y-0 max-w-sm">
+            {features.map((f, i) => (
+              <li
+                key={f}
+                className={`flex items-center gap-3 py-3 text-sm text-[#111111] ${
+                  i < features.length - 1 ? "border-b border-[#e5e7eb]" : ""
+                }`}
+              >
+                <span className="h-5 w-5 rounded-full bg-[#111111] grid place-items-center flex-shrink-0">
+                  <svg className="h-3 w-3 text-[#cbff1f]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                </span>
+                {f}
               </li>
             ))}
           </ul>
@@ -244,24 +250,26 @@ function Hero() {
               width={896}
               height={1152}
             />
-            <div className="absolute inset-x-0 bottom-0 p-5 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
-              <div className="text-white font-semibold text-lg">Anselmo Dias</div>
-              <div className="text-white/80 text-xs mb-2">
-                Contador · Especialista em MEI
+            {/* Top-left badge */}
+            <div className="absolute top-4 left-4 bg-white rounded-xl shadow-lg border border-[#e5e7eb] p-2.5 flex items-center gap-2.5">
+              <div className="h-8 w-8 rounded-lg bg-[#cbff1f] grid place-items-center flex-shrink-0">
+                <ShieldCheck className="h-4 w-4 text-[#111111]" />
               </div>
-              <p className="text-white/90 text-[13px] leading-snug">
-                Ajudo microempreendedores a resolver pendências, evitar multas e
-                manter seus negócios em conformidade.
+              <div>
+                <div className="text-[11px] text-[#6b7280] leading-tight">CNPJ em dia</div>
+                <div className="text-xs font-semibold text-[#111111] leading-tight">100% conforme a lei</div>
+              </div>
+            </div>
+            {/* Bottom overlay */}
+            <div className="absolute inset-x-0 bottom-0 p-5 bg-gradient-to-t from-black/90 via-black/50 to-transparent">
+              <div className="text-white font-bold text-xl">Anselmo Dias</div>
+              <div className="mt-2 inline-flex items-center rounded-full bg-[#cbff1f] px-3 py-1 text-xs font-semibold text-[#111111]">
+                Contador especialista em MEI
+              </div>
+              <p className="mt-2 text-white/90 text-sm leading-relaxed">
+                Ajudo microempreendedores a resolver pendências,<br className="hidden sm:block" />
+                evitar multas e manter seus negócios em conformidade.
               </p>
-            </div>
-          </div>
-          <div className="hidden md:flex absolute -left-6 top-10 bg-white rounded-2xl shadow-xl border border-[#e5e7eb] p-3 items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-[#cbff1f] grid place-items-center">
-              <ShieldCheck className="h-5 w-5 text-[#111111]" />
-            </div>
-            <div>
-              <div className="text-xs text-[#6b7280]">CNPJ em dia</div>
-              <div className="text-sm font-semibold">100% conforme a lei</div>
             </div>
           </div>
         </div>
