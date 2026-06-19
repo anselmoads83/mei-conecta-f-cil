@@ -198,13 +198,13 @@ function Hero() {
         <div className="animate-fade-up">
           <div className="inline-flex items-center gap-2 rounded-full border border-[#111111]/10 bg-white px-3 py-1.5 text-xs font-medium text-[#111111] mb-6">
             <span className="h-2 w-2 rounded-full bg-[#cbff1f]" />
-            Contador especialista em MEI
+            Contador <span className="font-bold">especialista</span> em MEI
           </div>
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-[1.05] text-[#111111]">
             MEI com DAS atrasado,{" "}
             <span className="relative inline-block">
               <span className="relative z-10">dívidas</span>
-              <span className="absolute inset-x-0 bottom-1 h-3 bg-[#cbff1f] -z-0" />
+              <span className="absolute inset-x-0 bottom-0 h-2.5 bg-[#cbff1f] -z-0" />
             </span>{" "}
             ou pendências?
           </h1>
