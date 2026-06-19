@@ -198,7 +198,7 @@ function Hero() {
         <div className="animate-fade-up">
           <div className="inline-flex items-center gap-2 rounded-full border border-[#111111]/10 bg-white px-3 py-1.5 text-xs font-medium text-[#111111] mb-6">
             <span className="h-2 w-2 rounded-full bg-[#cbff1f]" />
-            Contador especialista em MEI
+            Contador <span className="font-bold">especialista</span> em MEI
           </div>
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-[1.05] text-[#111111]">
             MEI com DAS atrasado,{" "}
