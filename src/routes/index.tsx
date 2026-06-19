@@ -204,7 +204,7 @@ function Hero() {
             MEI com DAS atrasado,{" "}
             <span className="relative inline-block">
               <span className="relative z-10">dívidas</span>
-              <span className="absolute inset-x-0 bottom-1 h-3 bg-[#cbff1f] -z-0" />
+              <span className="absolute inset-x-0 bottom-0 h-2.5 bg-[#cbff1f] -z-0" />
             </span>{" "}
             ou pendências?
           </h1>
