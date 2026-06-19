@@ -187,7 +187,7 @@ function Header() {
 function Hero() {
   const badges = [
     "Especialista em MEI",
-    "Atendimento em todo Brasil",
+    "Atendimento em todo o Brasil",
     "Suporte Humanizado",
     "Orientação Inicial Gratuita",
   ];
