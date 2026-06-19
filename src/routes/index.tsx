@@ -21,6 +21,7 @@ import {
   Phone,
 } from "lucide-react";
 import anselmoPhoto from "@/assets/anselmo-dias.jpg.asset.json";
+import anselmoPhotoHero from "@/assets/anselmo-dias-2.jpg.asset.json";
 import {
   Accordion,
   AccordionContent,
