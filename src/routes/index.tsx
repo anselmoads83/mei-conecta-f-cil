@@ -238,7 +238,7 @@ function Hero() {
           <div className="absolute -inset-6 bg-[#cbff1f]/30 blur-3xl rounded-full -z-10" />
           <div className="relative rounded-3xl overflow-hidden border border-[#111111]/10 bg-[#f5f5f5] aspect-[4/5] shadow-2xl">
             <img
-              src={anselmoPhoto.url}
+              src={anselmoPhotoHero.url}
               alt="Anselmo Dias, contador especialista em MEI"
               className="w-full h-full object-cover"
               width={896}
