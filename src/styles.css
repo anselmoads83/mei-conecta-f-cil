@@ -29,8 +29,32 @@
   padding-inline: 1.25rem;
 }
 
-html { scroll-behavior: smooth; }
-body { font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
+:root {
+  --header-height: calc(6rem + 1px);
+}
+
+@media (min-width: 640px) {
+  :root {
+    --header-height: calc(7rem + 1px);
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --header-height: calc(8rem + 1px);
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: var(--header-height);
+  overflow-x: hidden;
+}
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
 
 
 /*

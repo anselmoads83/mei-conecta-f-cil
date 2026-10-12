@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   MessageCircle,
   Instagram,
@@ -11,17 +11,25 @@ import {
   Sparkles,
   Receipt,
   FileText,
-  AlertTriangle,
   Briefcase,
-  Building2,
-  XCircle,
   Quote,
   ChevronDown,
   Mail,
   Phone,
+  Menu,
+  X,
+  FilePenLine,
+  MessagesSquare,
+  Calculator,
+  BriefcaseBusiness,
+  ClipboardCheck,
+  FileCheck,
+  Crown,
 } from "lucide-react";
-import anselmoPhoto from "@/assets/anselmo-dias.jpg.asset.json";
-import anselmoPhotoHero from "@/assets/anselmo-dias-2.jpg.asset.json";
+import anselmoPhoto from "@/assets/images/about-anselmo.jpg";
+import anselmoPhotoHero from "@/assets/images/hero-anselmo.jpg";
+import logoImg from "@/assets/images/logo-anselmo-dias.png";
+import heroGeometricImg from "@/assets/images/hero-geometric.png";
 import {
   Accordion,
   AccordionContent,
@@ -59,7 +67,15 @@ export const Route = createFileRoute("/")({
         content:
           "Receba orientação especializada para regularizar seu MEI. Atendimento humanizado via WhatsApp.",
       },
+      { property: "og:image", content: anselmoPhotoHero },
+      { property: "og:type", content: "website" },
       { property: "og:url", content: "/" },
+      { property: "og:locale", content: "pt_BR" },
+      { property: "og:site_name", content: "Anselmo Dias Contador" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Anselmo Dias — Contador Especialista em MEI" },
+      { name: "twitter:description", content: "Regularize seu MEI com um contador especialista: DAS atrasado, DASN-SIMEI, dívidas, NF-e, abertura e baixa." },
+      { name: "twitter:image", content: anselmoPhotoHero },
     ],
     links: [{ rel: "canonical", href: "/" }],
   }),
@@ -73,11 +89,13 @@ function CtaButton({
   className = "",
   variant = "primary",
   href = waLink,
+  onClick,
 }: {
   children: React.ReactNode;
   className?: string;
   variant?: "primary" | "ghost" | "dark";
   href?: string;
+  onClick?: () => void;
 }) {
   const base =
     "inline-flex items-center justify-center gap-2 rounded-full px-6 py-3.5 text-[15px] font-semibold transition-all duration-200 active:scale-[0.98]";
@@ -92,6 +110,7 @@ function CtaButton({
       href={href}
       target="_blank"
       rel="noopener noreferrer"
+      onClick={onClick}
       className={`${base} ${styles} ${className}`}
     >
       {children}
@@ -129,26 +148,43 @@ function SectionTitle({
   );
 }
 
+function SectionDivider({ className = "" }: { className?: string }) {
+  return (
+    <div
+      role="separator"
+      className={`w-full h-px bg-[#cbff1f] shadow-[0_0_8px_rgba(203,255,31,0.6)] border-0 relative z-20 pointer-events-none ${className}`}
+    />
+  );
+}
+
 /* --------------------------------- Page --------------------------------- */
 
 function LandingPage() {
   return (
-    <div className="min-h-screen bg-white text-[#111111] font-sans">
+    <div className="min-h-screen bg-white text-[#111111] font-sans overflow-x-clip">
       <Header />
       <main>
         <Hero />
+        <SectionDivider />
         <SocialProof />
+        <SectionDivider />
         <About />
-        <InstagramSection />
-        <Pain />
+        <SectionDivider />
         <Services />
+        <SectionDivider />
+        <Plans />
+        <SectionDivider />
         <Differentials />
-        <HowItWorks />
+        <SectionDivider />
         <Testimonials />
+        <SectionDivider />
         <TrustBlock />
+        <SectionDivider />
         <FAQ />
+        <SectionDivider />
         <FinalCTA />
       </main>
+      <SectionDivider />
       <Footer />
       <FloatingWhatsApp />
     </div>
@@ -158,26 +194,111 @@ function LandingPage() {
 /* --------------------------------- Header -------------------------------- */
 
 function Header() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const navItems = [
+    { label: "Quem Somos", href: "#quem-somos" },
+    { label: "Serviços", href: "#servicos" },
+    { label: "Planos", href: "#planos" },
+    { label: "Contato", href: "#contato" },
+  ];
+
   return (
-    <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-[#e5e7eb]">
-      <div className="container-x flex items-center justify-between h-16">
-        <a href="#top" className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-lg bg-[#111111] grid place-items-center">
-            <span className="text-[#cbff1f] font-bold text-sm">A</span>
-          </div>
-          <div className="leading-tight">
-            <div className="text-sm font-semibold">Anselmo Dias</div>
-            <div className="text-[10px] text-[#6b7280] uppercase tracking-wider">
-              Contador · MEI
-            </div>
-          </div>
+    <header className="sticky top-0 z-50 w-full max-w-[100vw] bg-[#000000] border-b border-white/10 shadow-lg">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative flex items-center justify-between h-24 sm:h-28 lg:h-32">
+        {/* Left: Official Logo. The PNG has large black margins, so it is shown inside a
+            frame matching the artwork's own aspect ratio (original file untouched, no distortion).
+            The hover zoom is applied to the frame itself, so the clip box scales with the artwork. */}
+        <a
+          href="#top"
+          className="group block flex-shrink-0 w-[150px] sm:w-[190px] lg:w-[230px]"
+          aria-label="Anselmo Dias Contador - Início"
+        >
+          <span className="relative block w-full overflow-hidden aspect-[644/290] origin-left transition-transform duration-300 ease-out will-change-transform group-hover:scale-[1.04]">
+            <img
+              src={logoImg}
+              alt="Anselmo Dias Contador"
+              className="absolute max-w-none w-[127.18%] h-auto left-[-13.35%] top-[-116.21%]"
+            />
+          </span>
         </a>
-        <CtaButton className="!px-4 !py-2 !text-sm">
-          <MessageCircle className="h-4 w-4" />
-          <span className="hidden sm:inline">Falar no WhatsApp</span>
-          <span className="sm:hidden">WhatsApp</span>
-        </CtaButton>
+
+        {/* Center: Desktop Navigation (lg and up) */}
+        <nav className="hidden lg:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
+          {navItems.map((item) => (
+            <a
+              key={item.href}
+              href={item.href}
+              className="text-[#CBFF1F] hover:text-white font-semibold text-[15px] tracking-tight transition-colors duration-200 py-1"
+            >
+              {item.label}
+            </a>
+          ))}
+        </nav>
+
+        {/* Right: WhatsApp CTA & Mobile Toggle */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* Desktop/Tablet WhatsApp Button */}
+          <div className="hidden sm:block">
+            <CtaButton className="!px-5 !py-2.5 !text-sm font-semibold shadow-[0_0_20px_-4px_rgba(203,255,31,0.5)]">
+              <MessageCircle className="h-4 w-4" />
+              <span>Falar no WhatsApp</span>
+            </CtaButton>
+          </div>
+
+          {/* Compact Mobile WhatsApp Button */}
+          <a
+            href={waLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Falar no WhatsApp"
+            className="sm:hidden inline-flex items-center justify-center w-9 h-9 rounded-full bg-[#cbff1f] text-[#111111] shadow-[0_0_12px_rgba(203,255,31,0.4)] active:scale-95 transition-transform flex-shrink-0"
+          >
+            <MessageCircle className="h-4 w-4" />
+          </a>
+
+          {/* Mobile Hamburger Toggle Button */}
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen((prev) => !prev)}
+            aria-label={mobileMenuOpen ? "Fechar menu" : "Abrir menu"}
+            className="lg:hidden inline-flex items-center justify-center w-9 h-9 rounded-lg bg-white/10 text-[#CBFF1F] hover:bg-white/15 transition-colors focus:outline-none flex-shrink-0"
+          >
+            {mobileMenuOpen ? (
+              <X className="h-5 w-5" />
+            ) : (
+              <Menu className="h-5 w-5" />
+            )}
+          </button>
+        </div>
       </div>
+
+      {/* Mobile Navigation Dropdown Menu */}
+      {mobileMenuOpen && (
+        <div className="lg:hidden bg-[#000000] border-t border-white/10 px-5 pt-3 pb-6 space-y-4 animate-in slide-in-from-top-2 duration-200">
+          <nav className="flex flex-col space-y-1">
+            {navItems.map((item) => (
+              <a
+                key={item.href}
+                href={item.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-[#CBFF1F] hover:text-white font-medium text-base py-3 px-2 rounded-lg hover:bg-white/5 transition-colors"
+              >
+                {item.label}
+              </a>
+            ))}
+          </nav>
+          <div className="pt-2 border-t border-white/10">
+            <CtaButton
+              className="w-full !py-3 !text-sm font-semibold justify-center"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <MessageCircle className="h-4 w-4" />
+              <span>Falar no WhatsApp</span>
+            </CtaButton>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
@@ -185,92 +306,58 @@ function Header() {
 /* ---------------------------------- Hero --------------------------------- */
 
 function Hero() {
-  const features = [
-    "Especialista em MEI",
-    "Atendimento em todo o Brasil",
-    "Suporte Humanizado",
-    "Orientação Inicial Gratuita",
-  ];
   return (
-    <section id="top" className="relative overflow-hidden">
-      <div className="absolute inset-0 -z-10 bg-[radial-gradient(60%_50%_at_50%_0%,rgba(203,255,31,0.15),transparent_70%)]" />
-      <div className="container-x grid lg:grid-cols-[1.1fr_1fr] gap-12 lg:gap-16 py-16 md:py-24 items-center">
-        <div className="animate-fade-up">
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#111111]/10 bg-white px-3 py-1.5 text-xs font-medium text-[#111111] mb-6">
-            <span className="h-2 w-2 rounded-full bg-[#cbff1f]" />
-            Contador <span className="font-bold">especialista</span> em MEI
-          </div>
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-[1.05] text-[#111111]">
-            MEI com DAS atrasado,{" "}
-            <span className="relative inline-block">
-              <span className="relative z-10">dívidas</span>
-              <span className="absolute inset-x-0 bottom-0 h-2.5 bg-[#cbff1f] -z-0" />
-            </span>{" "}
-            ou pendências?
-          </h1>
-          <p className="mt-6 text-lg text-[#6b7280] leading-relaxed">
-            Atendimento online para todo o Brasil.
-          </p>
+    <section id="top" className="relative bg-[#000000] text-white overflow-hidden py-14 sm:py-20 lg:py-28">
+      {/* Desktop Independent Right-Side Geometric Illustration Container */}
+      <div className="hidden lg:flex absolute top-1/2 -translate-y-1/2 right-8 lg:right-12 xl:right-20 w-[40%] xl:w-[42%] h-full items-center justify-center pointer-events-none select-none z-10">
+        <img
+          src={heroGeometricImg}
+          alt="Quadrados neon sobrepostos Anselmo Dias Contador"
+          aria-hidden="true"
+          className="w-full max-w-[460px] xl:max-w-[520px] h-auto object-contain scale-[1.35] xl:scale-[1.45] origin-center p-3"
+        />
+      </div>
 
-          <div className="mt-8 flex flex-col sm:flex-row gap-3">
-            <CtaButton className="!px-7 !py-4 !text-base">
-              <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5" aria-hidden="true">
-                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413"/>
-              </svg>
-              Falar com Especialista no WhatsApp
-            </CtaButton>
-          </div>
+      <div className="container-x relative z-20">
+        <div className="max-w-[700px] xl:max-w-[780px]">
+          {/* Typography Headline, Subtitle, CTA */}
+          <div className="animate-fade-up">
+            <h1 className="font-black uppercase tracking-[-0.035em] leading-[0.92] text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-[4.75rem] xl:text-[5.25rem]">
+              <span className="block text-white">CONTABILIDADE</span>
+              <span className="block text-[#CBFF1F]">ESPECIALIZADA</span>
+              <span className="block text-white">PARA O MEI</span>
+            </h1>
 
-          <ul className="mt-8 space-y-0 max-w-sm">
-            {features.map((f, i) => (
-              <li
-                key={f}
-                className={`flex items-center gap-3 py-3 text-sm text-[#111111] ${
-                  i < features.length - 1 ? "border-b border-[#e5e7eb]" : ""
-                }`}
+            <p className="mt-6 sm:mt-7 text-white/85 text-base sm:text-lg md:text-xl font-normal leading-relaxed max-w-xl">
+              Soluções completas para abrir, regularizar, organizar{" "}
+              <br className="hidden sm:inline" />
+              e manter o seu MEI em dia, com segurança e praticidade.
+            </p>
+
+            <div className="mt-8 sm:mt-10 flex items-center">
+              <a
+                href={waLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-3 bg-[#CBFF1F] text-[#111111] font-black uppercase text-sm sm:text-base px-7 sm:px-8 py-4 sm:py-4.5 rounded-full shadow-[0_0_30px_rgba(203,255,31,0.5)] hover:shadow-[0_0_45px_rgba(203,255,31,0.7)] hover:bg-[#b8e818] transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] tracking-wide"
               >
-                <span className="h-5 w-5 rounded-full bg-[#111111] grid place-items-center flex-shrink-0">
-                  <svg className="h-3 w-3 text-[#cbff1f]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                </span>
-                {f}
-              </li>
-            ))}
-          </ul>
-        </div>
+                <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5 flex-shrink-0" aria-hidden="true">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413"/>
+                </svg>
+                <span>QUERO CONTRATAR</span>
+                <ArrowRight className="h-5 w-5 stroke-[2.5]" />
+              </a>
+            </div>
+          </div>
 
-        <div className="relative animate-fade-up">
-          <div className="absolute -inset-6 bg-[#cbff1f]/30 blur-3xl rounded-full -z-10" />
-          <div className="relative rounded-3xl overflow-hidden border border-[#111111]/10 bg-[#f5f5f5] aspect-[4/5] shadow-2xl">
+          {/* Mobile/Tablet Geometric Illustration (Stacked Below CTA) */}
+          <div className="mt-12 flex lg:hidden items-center justify-center select-none pointer-events-none">
             <img
-              src={anselmoPhotoHero.url}
-              alt="Anselmo Dias, contador especialista em MEI"
-              className="w-full h-full object-cover"
-              width={896}
-              height={1152}
+              src={heroGeometricImg}
+              alt="Quadrados neon sobrepostos Anselmo Dias Contador"
+              aria-hidden="true"
+              className="w-full max-w-[300px] sm:max-w-[380px] md:max-w-[420px] h-auto object-contain origin-center p-2"
             />
-            {/* Top-left badge */}
-            <div className="absolute top-4 left-4 bg-white rounded-xl shadow-lg border border-[#e5e7eb] p-2.5 flex items-center gap-2.5">
-              <div className="h-8 w-8 rounded-lg bg-[#cbff1f] grid place-items-center flex-shrink-0">
-                <ShieldCheck className="h-4 w-4 text-[#111111]" />
-              </div>
-              <div>
-                <div className="text-[11px] text-[#6b7280] leading-tight">CNPJ em dia</div>
-                <div className="text-xs font-semibold text-[#111111] leading-tight">100% conforme a lei</div>
-              </div>
-            </div>
-            {/* Bottom overlay */}
-            <div className="absolute inset-x-0 bottom-0 p-5 bg-gradient-to-t from-black/90 via-black/50 to-transparent">
-              <div className="text-white font-bold text-xl">Anselmo Dias</div>
-              <div className="mt-2 inline-flex items-center rounded-full bg-[#cbff1f] px-3 py-1 text-xs font-semibold text-[#111111]">
-                Contador especialista em MEI
-              </div>
-              <p className="mt-2 text-white/90 text-sm leading-relaxed">
-                Ajudo microempreendedores a resolver pendências,<br className="hidden sm:block" />
-                evitar multas e manter seus negócios em conformidade.
-              </p>
-            </div>
           </div>
         </div>
       </div>
@@ -288,7 +375,7 @@ function SocialProof() {
     { value: "BR", label: "Atendimento Nacional" },
   ];
   return (
-    <section className="border-y border-[#e5e7eb] bg-[#fafafa]">
+    <section className="bg-[#fafafa]">
       <div className="container-x py-10 grid grid-cols-2 md:grid-cols-4 gap-6">
         {stats.map((s) => (
           <div key={s.label} className="text-center md:text-left">
@@ -309,14 +396,14 @@ function SocialProof() {
 
 function About() {
   return (
-    <section className="py-20 md:py-28">
+    <section id="quem-somos" className="py-20 md:py-28">
       <div className="container-x grid md:grid-cols-2 gap-12 items-center">
         <div className="order-2 md:order-1 relative">
           <div className="rounded-3xl overflow-hidden aspect-square border border-[#111111]/10">
             <img
-              src={anselmoPhoto.url}
+              src={anselmoPhoto}
               alt="Anselmo Dias em ambiente profissional"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover object-top"
               loading="lazy"
               width={896}
               height={896}
@@ -365,129 +452,341 @@ function About() {
   );
 }
 
-/* ------------------------------- Instagram ------------------------------- */
-
-function InstagramSection() {
-  const topics = [
-    "DAS e Parcelamentos",
-    "DASN-SIMEI",
-    "Emissão de Nota Fiscal",
-    "Direitos Previdenciários",
-    "Regularização do MEI",
-    "Atualizações da Legislação",
-  ];
-  return (
-    <section className="py-20 md:py-28 bg-[#111111] text-white relative overflow-hidden">
-      <div className="absolute inset-0 -z-0 bg-[radial-gradient(50%_50%_at_50%_0%,rgba(203,255,31,0.12),transparent_70%)]" />
-      <div className="container-x relative">
-        <div className="max-w-3xl mx-auto text-center mb-12">
-          <span className="inline-block text-xs font-semibold uppercase tracking-[0.18em] text-[#cbff1f] mb-3">
-            @anselmodiascontador
-          </span>
-          <h2 className="text-3xl md:text-5xl font-bold tracking-tight leading-[1.1]">
-            Conteúdo gratuito para o MEI
-          </h2>
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
-          {topics.map((t) => (
-            <div
-              key={t}
-              className="group rounded-2xl border border-white/10 bg-white/[0.03] p-5 md:p-6 hover:bg-white/[0.06] hover:border-[#cbff1f]/40 transition-all duration-300"
-            >
-              <Instagram className="h-5 w-5 text-[#cbff1f] mb-4" />
-              <div className="font-semibold">{t}</div>
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-12 text-center">
-          <CtaButton href={instagramLink}>
-            <Instagram className="h-5 w-5" />
-            Seguir @anselmodiascontador
-          </CtaButton>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ---------------------------------- Pain --------------------------------- */
-
-function Pain() {
-  const pains = [
-    { icon: AlertTriangle, title: "DAS atrasado", desc: "Mensalidades acumulando juros e multas." },
-    { icon: FileText, title: "DASN não entregue", desc: "Declaração anual em atraso e pendente." },
-    { icon: Receipt, title: "Dívidas do MEI", desc: "Débitos crescendo no seu CNPJ." },
-    { icon: Briefcase, title: "Emissão de Nota Fiscal", desc: "Dúvidas sobre como emitir NF-e." },
-    { icon: XCircle, title: "MEI desenquadrado", desc: "Perdeu o enquadramento e não sabe o próximo passo." },
-    { icon: Building2, title: "Baixa do MEI", desc: "Quer encerrar o CNPJ da forma correta." },
-  ];
-  return (
-    <section className="py-20 md:py-28 bg-[#fafafa]">
-      <div className="container-x">
-        <SectionTitle
-          kicker="Identificou sua situação?"
-          title="Você está passando por alguma dessas situações?"
-          subtitle="Se você se identificou com algum desses cenários, a hora de agir é agora — antes que o problema fique maior."
-        />
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {pains.map(({ icon: Icon, title, desc }) => (
-            <div
-              key={title}
-              className="group rounded-2xl bg-white border border-[#e5e7eb] p-6 hover:border-[#111111] hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
-            >
-              <div className="h-11 w-11 rounded-xl bg-[#111111] grid place-items-center mb-4 group-hover:bg-[#cbff1f] transition-colors">
-                <Icon className="h-5 w-5 text-[#cbff1f] group-hover:text-[#111111] transition-colors" />
-              </div>
-              <h3 className="font-semibold text-lg">{title}</h3>
-              <p className="text-sm text-[#6b7280] mt-1">{desc}</p>
-            </div>
-          ))}
-        </div>
-        <div className="mt-12 text-center">
-          <CtaButton>
-            <MessageCircle className="h-5 w-5" />
-            Quero Analisar Meu MEI
-          </CtaButton>
-        </div>
-      </div>
-    </section>
-  );
-}
-
 /* -------------------------------- Services ------------------------------- */
 
 function Services() {
-  const services = [
-    "Regularização de MEI",
-    "Parcelamento de Débitos",
-    "DASN-SIMEI",
-    "Emissão de NFS-e",
-    "Baixa de MEI",
-    "Abertura de MEI",
-    "Desenquadramento do MEI",
-    "Consultoria para MEI",
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    if (typeof IntersectionObserver === "undefined") {
+      setIsVisible(true);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  const serviceList = [
+    {
+      title: "Abertura do MEI",
+      desc: "Formalize seu negócio com orientação especializada.",
+      icon: BriefcaseBusiness,
+    },
+    {
+      title: "Alteração Cadastral",
+      desc: "Atualize atividades, endereço e dados do MEI.",
+      icon: FilePenLine,
+    },
+    {
+      title: "Encerramento do MEI",
+      desc: "Encerre seu MEI com orientação adequada.",
+      icon: FileCheck,
+    },
+    {
+      title: "DAS e Parcelamentos",
+      desc: "Atualize guias e negocie seus débitos.",
+      icon: Receipt,
+    },
+    {
+      title: "Declaração Anual (DASN-SIMEI)",
+      desc: "Elaboração e envio da declaração do MEI.",
+      icon: ClipboardCheck,
+    },
+    {
+      title: "Emissão de Notas Fiscais",
+      desc: "Emissão de NFS-e e orientação fiscal.",
+      icon: FileText,
+    },
+    {
+      title: "Imposto de Renda (IRPF)",
+      desc: "Declaração de IRPF do titular do MEI.",
+      icon: Calculator,
+    },
+    {
+      title: "Consultoria Contábil",
+      desc: "Orientação especializada para seu negócio.",
+      icon: MessagesSquare,
+    },
   ];
+
   return (
-    <section className="py-20 md:py-28">
-      <div className="container-x">
-        <SectionTitle
-          kicker="Serviços"
-          title="Como posso te ajudar?"
-          subtitle="Soluções completas para o ciclo de vida do seu MEI — do início ao encerramento."
-        />
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {services.map((s, i) => (
-            <div
-              key={s}
-              className="group relative rounded-2xl border border-[#e5e7eb] bg-white p-6 hover:border-[#cbff1f] hover:shadow-md transition-all duration-300"
-            >
-              <div className="text-xs text-[#6b7280] mb-2">
-                0{i + 1}
+    <section ref={sectionRef} id="servicos" className="bg-[#000000] text-white py-20 sm:py-24 lg:py-32 relative overflow-hidden">
+      <div className="container-x relative z-10">
+        {/* Section Header */}
+        <div className="max-w-3xl mx-auto text-center mb-12 sm:mb-16">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight uppercase text-white">
+            SERVIÇOS
+          </h2>
+
+          <p className="mt-4 sm:mt-5 text-white/70 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
+            Soluções especializadas para abrir, regularizar e cuidar do seu MEI.
+          </p>
+        </div>
+
+        {/* 8 Service Cards Grid: 4 cols on desktop, 2 cols on tablet, 1 col on mobile */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
+          {serviceList.map((item, i) => {
+            const Icon = item.icon;
+            return (
+              <div
+                key={item.title}
+                className={`group flex flex-col rounded-2xl border border-[#303535] bg-[#101313] p-6 sm:p-7 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:border-[#cbff1f]/50 hover:shadow-[0_8px_30px_rgba(203,255,31,0.12)] motion-reduce:transform-none motion-reduce:transition-none motion-reduce:animate-none motion-reduce:opacity-100 ${
+                  isVisible ? "animate-fade-up" : "opacity-0"
+                }`}
+                style={{ animationDelay: `${i * 60}ms` }}
+              >
+                {/* Minimalist Icon Badge */}
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#1b2b0a] to-[#0d1606] border border-[#cbff1f]/30 flex items-center justify-center text-[#cbff1f] group-hover:border-[#cbff1f]/60 group-hover:shadow-[0_0_15px_rgba(203,255,31,0.25)] group-hover:scale-105 transition-all duration-300 flex-shrink-0">
+                  <Icon className="h-6 w-6 stroke-[2]" />
+                </div>
+
+                {/* Service Title */}
+                <h3 className="text-white font-bold text-lg sm:text-[19px] mt-6 mb-2 leading-snug">
+                  {item.title}
+                </h3>
+
+                {/* Service Description */}
+                <p className="text-white/70 text-sm sm:text-[15px] leading-relaxed">
+                  {item.desc}
+                </p>
               </div>
-              <h3 className="font-semibold text-lg leading-snug">{s}</h3>
-              <ArrowRight className="absolute top-6 right-6 h-4 w-4 text-[#6b7280] group-hover:text-[#111111] group-hover:translate-x-1 transition-all" />
+            );
+          })}
+        </div>
+
+        {/* Section CTA Button */}
+        <div className="mt-14 sm:mt-16 flex justify-center">
+          <a
+            href={waLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-3 bg-[#CBFF1F] hover:bg-[#b8e818] text-[#111111] font-extrabold uppercase text-sm sm:text-base px-8 sm:px-10 py-4 sm:py-4.5 rounded-full shadow-[0_0_30px_rgba(203,255,31,0.45)] hover:shadow-[0_0_45px_rgba(203,255,31,0.65)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 tracking-wide"
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5 flex-shrink-0" aria-hidden="true">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413"/>
+            </svg>
+            <span>QUERO FALAR COM UM ESPECIALISTA</span>
+            <ArrowRight className="h-5 w-5 stroke-[2.5]" />
+          </a>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* --------------------------------- Plans --------------------------------- */
+
+function PlanCheckIcon() {
+  return (
+    <div className="w-5 h-5 rounded-full bg-[#cbff1f] flex items-center justify-center flex-shrink-0 mt-0.5 shadow-[0_0_8px_rgba(203,255,31,0.4)]">
+      <svg
+        viewBox="0 0 12 12"
+        fill="none"
+        className="w-3 h-3 text-[#000000] stroke-current stroke-[2.2] stroke-linecap-round stroke-linejoin-round"
+        aria-hidden="true"
+      >
+        <polyline points="2.5 6 4.8 8.5 9.5 3.5" />
+      </svg>
+    </div>
+  );
+}
+
+function Plans() {
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    if (typeof IntersectionObserver === "undefined") {
+      setIsVisible(true);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  const plans = [
+    {
+      id: "start",
+      name: "START",
+      nameColor: "text-[#cbff1f]",
+      desc: "Essencial para o seu MEI",
+      price: "79,90",
+      period: "por mês",
+      highlighted: false,
+      badge: null,
+      waLink: `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+        "Olá! Tenho interesse no plano START de R$ 79,90 por mês."
+      )}`,
+      services: [
+        "Emissão da guia DAS mensal",
+        "Elaboração e envio da Declaração Anual (DASN-SIMEI)",
+        "Acompanhamento do faturamento do MEI",
+        "Monitoramento de pendências fiscais",
+        "Suporte pelo WhatsApp",
+      ],
+    },
+    {
+      id: "pro",
+      name: "PRO",
+      nameColor: "text-white",
+      desc: "Mais praticidade e suporte",
+      price: "149,90",
+      period: "por mês",
+      highlighted: true,
+      badge: "MAIS ESCOLHIDO",
+      waLink: `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+        "Olá! Tenho interesse no plano PRO de R$ 149,90 por mês."
+      )}`,
+      services: [
+        "Todos os serviços do plano START",
+        "Emissão de até 5 notas fiscais de serviço (NFS-e) por mês",
+        "Recálculo de guias DAS em atraso",
+        "Solicitação e acompanhamento de parcelamentos",
+        "Alterações cadastrais do MEI",
+        "Orientação sobre emissão de notas fiscais de serviços",
+        "Suporte pelo WhatsApp",
+      ],
+    },
+    {
+      id: "premium",
+      name: "PREMIUM",
+      nameColor: "text-white",
+      desc: "Gestão completa para o seu MEI",
+      price: "249,90",
+      period: "por mês",
+      highlighted: false,
+      badge: null,
+      waLink: `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+        "Olá! Tenho interesse no plano PREMIUM de R$ 249,90 por mês."
+      )}`,
+      services: [
+        "Todos os serviços do plano PRO",
+        "Emissão de até 30 notas fiscais de serviço (NFS-e) por mês",
+        "Notas fiscais adicionais por R$ 5,90 cada",
+        "Gestão da folha de pagamento de até 1 funcionário",
+        "Consultoria contábil",
+        "Acompanhamento das obrigações do MEI",
+        "Atendimento prioritário pelo WhatsApp",
+      ],
+    },
+  ];
+
+  return (
+    <section
+      ref={sectionRef}
+      id="planos"
+      className="bg-[#000000] text-white py-20 sm:py-24 lg:py-32 relative overflow-hidden"
+    >
+      {/* Background Subtle Radial Glow */}
+      <div className="absolute inset-0 -z-0 bg-[radial-gradient(circle_at_50%_35%,rgba(203,255,31,0.07),transparent_70%)] pointer-events-none" />
+
+      <div className="container-x relative z-10">
+        {/* Section Header */}
+        <div className="max-w-3xl mx-auto text-center mb-14 sm:mb-16">
+          <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight uppercase text-white font-sans">
+            PLANOS
+          </h2>
+          <p className="mt-4 sm:mt-5 text-white/70 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
+            Escolha o plano ideal para o seu MEI e tenha todo o suporte que você precisa em um só lugar.
+          </p>
+        </div>
+
+        {/* 3 Pricing Cards Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch max-w-6xl mx-auto">
+          {plans.map((plan, i) => (
+            <div
+              key={plan.id}
+              className={`relative flex flex-col justify-between rounded-[28px] p-7 sm:p-8 transition-all duration-300 ease-out hover:-translate-y-1.5 motion-reduce:transform-none motion-reduce:transition-none motion-reduce:animate-none motion-reduce:opacity-100 ${
+                plan.highlighted
+                  ? "bg-[#0d0f0f] border-2 border-[#cbff1f] shadow-[0_0_35px_rgba(203,255,31,0.22)] hover:shadow-[0_0_45px_rgba(203,255,31,0.35)]"
+                  : "bg-[#0d0f0f] border border-[#272b2b] hover:border-[#cbff1f]/50 hover:shadow-[0_8px_30px_rgba(203,255,31,0.12)]"
+              } ${isVisible ? "animate-fade-up" : "opacity-0"}`}
+              style={{ animationDelay: `${i * 90}ms` }}
+            >
+              {/* Highlight Badge */}
+              {plan.badge && (
+                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
+                  <span className="bg-[#cbff1f] text-[#000000] text-xs font-black uppercase tracking-wider py-1.5 px-4 rounded-full inline-flex items-center gap-1.5 shadow-[0_0_15px_rgba(203,255,31,0.5)] select-none whitespace-nowrap">
+                    <Crown className="w-3.5 h-3.5 fill-current stroke-[2]" />
+                    {plan.badge}
+                  </span>
+                </div>
+              )}
+
+              {/* Card Body */}
+              <div className="flex-1 flex flex-col">
+                <h3 className={`font-black text-2xl sm:text-[26px] tracking-tight uppercase ${plan.nameColor}`}>
+                  {plan.name}
+                </h3>
+                <p className="text-white/70 text-sm sm:text-[15px] mt-1">
+                  {plan.desc}
+                </p>
+
+                <div className="mt-5 mb-1 flex items-baseline">
+                  <span className="text-xl sm:text-2xl font-bold text-white mr-1.5">R$</span>
+                  <span className="text-4xl sm:text-5xl font-black text-white tracking-tight">{plan.price}</span>
+                </div>
+                <div className="text-white/60 text-sm font-medium mb-6">
+                  {plan.period}
+                </div>
+
+                <div className="h-px w-full bg-white/10 mb-6" />
+
+                {/* Services List */}
+                <ul className="space-y-4 mb-8 flex-1">
+                  {plan.services.map((service) => (
+                    <li key={service} className="flex items-start gap-3.5">
+                      <PlanCheckIcon />
+                      <span className="text-white/90 text-sm sm:text-[14.5px] leading-snug">
+                        {service}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Card CTA Button (Horizontally aligned at the bottom across all cards) */}
+              <div className="mt-auto pt-2">
+                <a
+                  href={plan.waLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-3.5 px-6 rounded-full bg-[#cbff1f] hover:bg-[#b8e818] text-[#000000] font-black text-sm sm:text-base tracking-wide flex items-center justify-center gap-2.5 transition-all duration-300 shadow-[0_0_20px_rgba(203,255,31,0.35)] hover:shadow-[0_0_30px_rgba(203,255,31,0.55)] hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    className="w-5 h-5 flex-shrink-0"
+                    aria-hidden="true"
+                  >
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413"/>
+                  </svg>
+                  <span>Quero este plano</span>
+                </a>
+              </div>
             </div>
           ))}
         </div>
@@ -531,66 +830,6 @@ function Differentials() {
               <p className="text-sm text-white/60 mt-1">{desc}</p>
             </div>
           ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ----------------------------- How it works ------------------------------ */
-
-function HowItWorks() {
-  const steps = [
-    { n: "01", t: "Clique no WhatsApp", d: "Inicie a conversa em segundos." },
-    { n: "02", t: "Explique sua situação", d: "Conte o que está acontecendo com seu MEI." },
-    { n: "03", t: "Receba análise inicial", d: "Diagnóstico gratuito do seu caso." },
-    { n: "04", t: "Conheça a melhor solução", d: "Plano de ação claro e personalizado." },
-  ];
-  return (
-    <section className="py-20 md:py-28">
-      <div className="container-x">
-        <SectionTitle
-          kicker="Como funciona"
-          title="Simples, rápido e sem complicação"
-          subtitle="Em quatro passos você sai da pendência e volta a operar tranquilo."
-        />
-        <div className="grid md:grid-cols-4 gap-4 relative">
-          {steps.map((s, i) => (
-            <div
-              key={s.n}
-              className="relative rounded-2xl bg-white border border-[#e5e7eb] p-6"
-            >
-              <div className="flex items-start gap-1">
-                <div className="inline-flex items-center justify-center rounded-xl bg-[#111111] px-3 py-1.5">
-                  <span className="text-3xl font-bold text-[#cbff1f] leading-none">
-                    {s.n}
-                  </span>
-                </div>
-                {i === 0 && (
-                  <Sparkles className="h-5 w-5 text-[#cbff1f] -mt-1 -ml-1" />
-                )}
-              </div>
-              <h3 className="mt-4 font-semibold text-lg">{s.t}</h3>
-              <div className="mt-2 h-1 w-8 rounded-full bg-[#cbff1f]" />
-              <p className="mt-3 text-sm text-[#6b7280]">{s.d}</p>
-              {i < steps.length - 1 && (
-                <ArrowRight className="hidden md:block absolute top-1/2 -right-3 -translate-y-1/2 h-5 w-5 text-[#e5e7eb]" />
-              )}
-            </div>
-          ))}
-        </div>
-        <div className="mt-12 text-center">
-          <CtaButton>
-            <svg
-              className="h-5 w-5"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.521.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-            </svg>
-            Falar com Especialista no WhatsApp
-          </CtaButton>
         </div>
       </div>
     </section>
@@ -835,7 +1074,7 @@ function Footer() {
             </p>
           </div>
 
-          <div>
+          <div id="contato">
             <div className="text-xs font-semibold uppercase tracking-wider text-white/50 mb-4">
               Contato
             </div>
