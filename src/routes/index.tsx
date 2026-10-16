@@ -5,15 +5,14 @@ import {
   Instagram,
   CheckCircle2,
   ArrowRight,
-  ShieldCheck,
-  Heart,
   MapPin,
-  Sparkles,
   Receipt,
   FileText,
-  Briefcase,
   Quote,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Star,
   Mail,
   Phone,
   Menu,
@@ -40,8 +39,7 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
+  type CarouselApi,
 } from "@/components/ui/carousel";
 
 // Número WhatsApp: (11) 98330-2016
@@ -173,8 +171,6 @@ function LandingPage() {
         <Services />
         <SectionDivider />
         <Plans />
-        <SectionDivider />
-        <Differentials />
         <SectionDivider />
         <Testimonials />
         <SectionDivider />
@@ -590,7 +586,7 @@ function Services() {
 
 function PlanCheckIcon() {
   return (
-    <div className="w-5 h-5 rounded-full bg-[#cbff1f] flex items-center justify-center flex-shrink-0 mt-0.5 shadow-[0_0_8px_rgba(203,255,31,0.4)]">
+    <div className="w-5 h-5 rounded-full bg-[#cbff1f] flex items-center justify-center flex-shrink-0 mt-0.5">
       <svg
         viewBox="0 0 12 12"
         fill="none"
@@ -631,65 +627,73 @@ function Plans() {
     {
       id: "start",
       name: "START",
-      nameColor: "text-[#cbff1f]",
-      desc: "Essencial para o seu MEI",
-      price: "79,90",
-      period: "por mês",
+      nameColor: "text-white",
+      desc: "Essencial para o seu MEI.",
+      price: "99,00",
+      period: "/mês",
       highlighted: false,
       badge: null,
       waLink: `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
-        "Olá! Tenho interesse no plano START de R$ 79,90 por mês."
+        "Olá! Tenho interesse no Plano START de R$ 99,00/mês. Gostaria de saber mais."
       )}`,
       services: [
-        "Emissão da guia DAS mensal",
-        "Elaboração e envio da Declaração Anual (DASN-SIMEI)",
-        "Acompanhamento do faturamento do MEI",
-        "Monitoramento de pendências fiscais",
-        "Suporte pelo WhatsApp",
+        "Abertura do CNPJ MEI.",
+        "Emissão da guia DAS mensal.",
+        "Recálculo da guia DAS em atraso.",
+        "Elaboração da Declaração Anual (DASN-SIMEI).",
+        "Acompanhamento do faturamento do MEI.",
+        "Monitoramento de pendências fiscais.",
+        "App de Serviços.",
+        "Suporte pelo WhatsApp.",
       ],
     },
     {
       id: "pro",
       name: "PRO",
       nameColor: "text-white",
-      desc: "Mais praticidade e suporte",
-      price: "149,90",
-      period: "por mês",
+      desc: "Mais praticidade e suporte.",
+      price: "169,00",
+      period: "/mês",
       highlighted: true,
       badge: "MAIS ESCOLHIDO",
       waLink: `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
-        "Olá! Tenho interesse no plano PRO de R$ 149,90 por mês."
+        "Olá! Tenho interesse no Plano PRO de R$ 169,00/mês. Gostaria de saber mais."
       )}`,
       services: [
-        "Todos os serviços do plano START",
-        "Emissão de até 5 notas fiscais de serviço (NFS-e) por mês",
-        "Recálculo de guias DAS em atraso",
-        "Solicitação e acompanhamento de parcelamentos",
-        "Alterações cadastrais do MEI",
-        "Orientação sobre emissão de notas fiscais de serviços",
-        "Suporte pelo WhatsApp",
+        "Todos os serviços do plano START.",
+        "Emissão de até 5 notas fiscais de serviço (NFS-e) por mês.",
+        "Notas fiscais adicionais por R$ 8,50 cada.",
+        "Orientação sobre emissão de notas fiscais de serviços.",
+        "Solicitação e acompanhamento de parcelamentos.",
+        "Alterações no CNPJ MEI.",
+        "Baixa do CNPJ MEI.",
+        "App de Serviços.",
+        "Suporte pelo WhatsApp.",
       ],
     },
     {
-      id: "premium",
-      name: "PREMIUM",
+      id: "black",
+      name: "BLACK",
       nameColor: "text-white",
-      desc: "Gestão completa para o seu MEI",
-      price: "249,90",
-      period: "por mês",
+      desc: "Gestão completa para o seu MEI.",
+      price: "269,00",
+      period: "/mês",
       highlighted: false,
       badge: null,
       waLink: `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
-        "Olá! Tenho interesse no plano PREMIUM de R$ 249,90 por mês."
+        "Olá! Tenho interesse no Plano BLACK de R$ 269,00/mês. Gostaria de saber mais."
       )}`,
       services: [
-        "Todos os serviços do plano PRO",
-        "Emissão de até 30 notas fiscais de serviço (NFS-e) por mês",
-        "Notas fiscais adicionais por R$ 5,90 cada",
-        "Gestão da folha de pagamento de até 1 funcionário",
-        "Consultoria contábil",
-        "Acompanhamento das obrigações do MEI",
-        "Atendimento prioritário pelo WhatsApp",
+        "Todos os serviços do plano PRO.",
+        "Emissão ilimitada de notas fiscais de serviço (NFS-e).",
+        "Emissão ilimitada de notas fiscais de produto (NF-e).",
+        "Desenquadramento do MEI.",
+        "Consultoria para transição do MEI ao Simples Nacional.",
+        "Regularização de CNPJ INAPTO.",
+        "Emissão de certidões negativas.",
+        "Consultoria Fiscal estratégica.",
+        "App de Serviços.",
+        "Suporte pelo WhatsApp.",
       ],
     },
   ];
@@ -700,9 +704,6 @@ function Plans() {
       id="planos"
       className="bg-[#000000] text-white py-20 sm:py-24 lg:py-32 relative overflow-hidden"
     >
-      {/* Background Subtle Radial Glow */}
-      <div className="absolute inset-0 -z-0 bg-[radial-gradient(circle_at_50%_35%,rgba(203,255,31,0.07),transparent_70%)] pointer-events-none" />
-
       <div className="container-x relative z-10">
         {/* Section Header */}
         <div className="max-w-3xl mx-auto text-center mb-14 sm:mb-16">
@@ -721,15 +722,15 @@ function Plans() {
               key={plan.id}
               className={`relative flex flex-col justify-between rounded-[28px] p-7 sm:p-8 transition-all duration-300 ease-out hover:-translate-y-1.5 motion-reduce:transform-none motion-reduce:transition-none motion-reduce:animate-none motion-reduce:opacity-100 ${
                 plan.highlighted
-                  ? "bg-[#0d0f0f] border-2 border-[#cbff1f] shadow-[0_0_35px_rgba(203,255,31,0.22)] hover:shadow-[0_0_45px_rgba(203,255,31,0.35)]"
-                  : "bg-[#0d0f0f] border border-[#272b2b] hover:border-[#cbff1f]/50 hover:shadow-[0_8px_30px_rgba(203,255,31,0.12)]"
+                  ? "bg-[#0d0f0f] border-2 border-[#cbff1f]"
+                  : "bg-[#0d0f0f] border border-[#272b2b] hover:border-white/20"
               } ${isVisible ? "animate-fade-up" : "opacity-0"}`}
               style={{ animationDelay: `${i * 90}ms` }}
             >
               {/* Highlight Badge */}
               {plan.badge && (
                 <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                  <span className="bg-[#cbff1f] text-[#000000] text-xs font-black uppercase tracking-wider py-1.5 px-4 rounded-full inline-flex items-center gap-1.5 shadow-[0_0_15px_rgba(203,255,31,0.5)] select-none whitespace-nowrap">
+                  <span className="bg-[#cbff1f] text-[#000000] text-xs font-black uppercase tracking-wider py-1.5 px-4 rounded-full inline-flex items-center gap-1.5 select-none whitespace-nowrap">
                     <Crown className="w-3.5 h-3.5 fill-current stroke-[2]" />
                     {plan.badge}
                   </span>
@@ -774,7 +775,7 @@ function Plans() {
                   href={plan.waLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full py-3.5 px-6 rounded-full bg-[#cbff1f] hover:bg-[#b8e818] text-[#000000] font-black text-sm sm:text-base tracking-wide flex items-center justify-center gap-2.5 transition-all duration-300 shadow-[0_0_20px_rgba(203,255,31,0.35)] hover:shadow-[0_0_30px_rgba(203,255,31,0.55)] hover:scale-[1.02] active:scale-[0.98]"
+                  className="w-full py-3.5 px-6 rounded-full bg-[#cbff1f] hover:bg-[#b8e818] text-[#000000] font-black text-sm sm:text-base tracking-wide flex items-center justify-center gap-2.5 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   <svg
                     viewBox="0 0 24 24"
@@ -784,7 +785,7 @@ function Plans() {
                   >
                     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413"/>
                   </svg>
-                  <span>Quero este plano</span>
+                  <span>QUERO ESTE PLANO</span>
                 </a>
               </div>
             </div>
@@ -795,104 +796,268 @@ function Plans() {
   );
 }
 
-/* ----------------------------- Differentials ----------------------------- */
-
-function Differentials() {
-  const items = [
-    { icon: Heart, title: "Atendimento Humanizado", desc: "Atenção pessoal, sem robôs ou frieza." },
-    { icon: Sparkles, title: "Especialização em MEI", desc: "Foco total em microempreendedores." },
-    { icon: MessageCircle, title: "Linguagem Simples", desc: "Sem juridiquês, direto ao ponto." },
-    { icon: MapPin, title: "Atendimento Nacional", desc: "Online para todo o Brasil." },
-    { icon: ShieldCheck, title: "Transparência", desc: "Valores e prazos sempre claros." },
-    { icon: Briefcase, title: "Experiência Prática", desc: "Há anos resolvendo casos reais de MEI." },
-  ];
-  return (
-    <section className="py-20 md:py-28 bg-[#111111] text-white">
-      <div className="container-x">
-        <div className="max-w-3xl mb-12 text-center mx-auto">
-          <span className="inline-block text-xs font-semibold uppercase tracking-[0.18em] text-[#cbff1f] mb-3">
-            Diferenciais
-          </span>
-          <h2 className="text-3xl md:text-5xl font-bold tracking-tight leading-[1.1]">
-            Por que escolher Anselmo Dias?
-          </h2>
-        </div>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {items.map(({ icon: Icon, title, desc }) => (
-            <div
-              key={title}
-              className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 hover:bg-white/[0.06] transition-colors"
-            >
-              <div className="h-11 w-11 rounded-xl bg-[#cbff1f] grid place-items-center mb-4">
-                <Icon className="h-5 w-5 text-[#111111]" />
-              </div>
-              <h3 className="font-semibold text-lg">{title}</h3>
-              <p className="text-sm text-white/60 mt-1">{desc}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
 /* ------------------------------ Testimonials ----------------------------- */
 
+interface TestimonialItem {
+  id: number;
+  initials: string;
+  clientName: string;
+  serviceTopic: string;
+  quote: string;
+  rating?: number;
+  isVerified?: boolean;
+}
+
 function Testimonials() {
-  const testimonials = [
+  const [api, setApi] = useState<CarouselApi>();
+  const [current, setCurrent] = useState(0);
+  const [count, setCount] = useState(0);
+  const [canScrollPrev, setCanScrollPrev] = useState(false);
+  const [canScrollNext, setCanScrollNext] = useState(false);
+
+  useEffect(() => {
+    if (!api) return;
+
+    const updateCarouselState = () => {
+      setCurrent(api.selectedScrollSnap());
+      setCount(api.scrollSnapList().length);
+      setCanScrollPrev(api.canScrollPrev());
+      setCanScrollNext(api.canScrollNext());
+    };
+
+    updateCarouselState();
+    api.on("select", updateCarouselState);
+    api.on("reInit", updateCarouselState);
+
+    return () => {
+      api.off("select", updateCarouselState);
+      api.off("reInit", updateCarouselState);
+    };
+  }, [api]);
+
+  const testimonials: TestimonialItem[] = [
     {
-      name: "Mariana S.",
-      role: "MEI · Confeitaria",
-      text: "Estava com DAS atrasado há mais de um ano. Em poucos dias o Anselmo organizou tudo e ainda parcelou os débitos. Atendimento incrível!",
+      id: 1,
+      initials: "MA",
+      clientName: "Marcos Alves",
+      serviceTopic: "Abertura do MEI",
+      quote:
+        "Eu tinha muitas dúvidas sobre como abrir meu MEI, mas fui muito bem orientado. O processo foi rápido, simples e sem complicações.",
+      rating: 5,
+      isVerified: false,
     },
     {
-      name: "Carlos M.",
-      role: "MEI · Serviços Gerais",
-      text: "Linguagem simples, sem enrolação. Resolvi a DASN que estava pendente e hoje meu CNPJ está 100% em dia.",
+      id: 2,
+      initials: "MS",
+      clientName: "Mayara Santos",
+      serviceTopic: "Atendimento Humanizado",
+      quote:
+        "Atendimento excelente! Todas as minhas dúvidas foram esclarecidas com paciência e atenção. É muito bom contar com um profissional que realmente se preocupa com o cliente.",
+      rating: 5,
+      isVerified: false,
     },
     {
-      name: "Juliana R.",
-      role: "MEI · Designer",
-      text: "Precisava emitir NF-e e estava perdida. O Anselmo me ensinou tudo pelo WhatsApp em uma tarde. Recomendo demais.",
+      id: 3,
+      initials: "JM",
+      clientName: "João Manoel",
+      serviceTopic: "Regularização de Débitos",
+      quote:
+        "Meu MEI estava com várias pendências e eu não sabia por onde começar. Recebi toda a orientação necessária para organizar minha situação.",
+      rating: 5,
+      isVerified: false,
     },
     {
-      name: "Rafael T.",
-      role: "MEI · E-commerce",
-      text: "Fui desenquadrado e achei que perderia meu negócio. Ele me guiou em cada passo. Profissional de confiança.",
+      id: 4,
+      initials: "RS",
+      clientName: "Rodrigo Silva",
+      serviceTopic: "Emissão de Notas Fiscais",
+      quote:
+        "Eu tinha muita dificuldade para emitir notas fiscais. Agora tenho o suporte que preciso e consigo cuidar do meu negócio com muito mais tranquilidade.",
+      rating: 5,
+      isVerified: false,
+    },
+    {
+      id: 5,
+      initials: "SR",
+      clientName: "Sheila Rodrigues",
+      serviceTopic: "Declaração Anual",
+      quote:
+        "Sempre tive receio de fazer a declaração anual do MEI de forma errada. Com o acompanhamento contábil, tudo ficou mais simples e organizado.",
+      rating: 5,
+      isVerified: false,
+    },
+    {
+      id: 6,
+      initials: "AF",
+      clientName: "Antônio Filho",
+      serviceTopic: "Suporte pelo WhatsApp",
+      quote:
+        "O que mais gostei foi da facilidade no atendimento. Sempre que preciso de orientação, consigo esclarecer minhas dúvidas pelo WhatsApp de maneira prática.",
+      rating: 5,
+      isVerified: false,
+    },
+    {
+      id: 7,
+      initials: "GP",
+      clientName: "Gustavo Pedroso",
+      serviceTopic: "Consultoria Contábil",
+      quote:
+        "Ter uma orientação profissional fez toda a diferença para o meu negócio. Hoje entendo melhor minhas obrigações e consigo tomar decisões com mais segurança.",
+      rating: 5,
+      isVerified: false,
+    },
+    {
+      id: 8,
+      initials: "NO",
+      clientName: "Nathan Oliveira",
+      serviceTopic: "Experiência Geral",
+      quote:
+        "Profissionalismo, atenção e muita clareza nas explicações. Recomendo para quem é MEI e procura um atendimento de confiança e qualidade.",
+      rating: 5,
+      isVerified: false,
     },
   ];
+
   return (
-    <section className="py-20 md:py-28 bg-[#fafafa]">
-      <div className="container-x">
-        <SectionTitle
-          kicker="Depoimentos"
-          title="O que dizem nossos clientes"
-        />
-        <Carousel opts={{ align: "start", loop: true }} className="w-full">
-          <CarouselContent className="-ml-4">
-            {testimonials.map((t) => (
-              <CarouselItem
-                key={t.name}
-                className="pl-4 md:basis-1/2 lg:basis-1/3"
-              >
-                <div className="h-full rounded-2xl bg-white border border-[#e5e7eb] p-6 md:p-7">
-                  <Quote className="h-7 w-7 text-[#cbff1f]" />
-                  <p className="mt-4 text-[#111111] leading-relaxed">
-                    "{t.text}"
-                  </p>
-                  <div className="mt-6 pt-4 border-t border-[#e5e7eb]">
-                    <div className="font-semibold">{t.name}</div>
-                    <div className="text-xs text-[#6b7280]">{t.role}</div>
+    <section id="depoimentos" className="py-20 sm:py-24 lg:py-32 bg-[#FFFFFF] relative overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        {/* Section Header */}
+        <div className="max-w-3xl mx-auto text-center mb-12 sm:mb-16">
+          <span className="inline-block text-xs sm:text-sm font-bold uppercase tracking-[0.2em] text-[#6b7280] mb-3 select-none">
+            DEPOIMENTOS
+          </span>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-[#000000] tracking-tight uppercase leading-[1.1]">
+            O QUE DIZEM NOSSOS CLIENTES
+          </h2>
+          <p className="mt-4 text-base sm:text-lg text-[#555555] max-w-2xl mx-auto leading-relaxed">
+            A confiança de quem já conta com o nosso trabalho.
+          </p>
+        </div>
+
+        {/* Carousel Container with Flanking Navigation Arrows */}
+        <div className="relative px-5 sm:px-12 lg:px-14">
+          <Carousel
+            opts={{
+              align: "start",
+              loop: false,
+              slidesToScroll: 1,
+            }}
+            setApi={setApi}
+            className="w-full"
+          >
+            <CarouselContent className="-ml-4 sm:-ml-5 items-stretch">
+              {testimonials.map((t) => (
+                <CarouselItem
+                  key={t.id}
+                  className="pl-4 sm:pl-5 basis-full sm:basis-1/2 lg:basis-1/4 flex flex-col"
+                >
+                  <div className="h-full rounded-[16px] bg-[#000000] border border-[#222222] p-6 sm:p-7 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1.5 hover:border-[#cbff1f]/40 hover:shadow-xl motion-reduce:transform-none motion-reduce:transition-none">
+                    <div className="flex-1 flex flex-col">
+                      {/* Circular Initials Avatar Placeholder */}
+                      <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#181a1a] border border-[#cbff1f]/30 flex items-center justify-center text-[#cbff1f] font-bold text-sm sm:text-base tracking-wider select-none shadow-inner flex-shrink-0">
+                        {t.initials}
+                      </div>
+
+                      {/* Decorative Neon Lime-Green Quotation Mark */}
+                      <div className="mt-4 mb-2 text-[#cbff1f] select-none" aria-hidden="true">
+                        <svg className="w-7 h-7 sm:w-8 sm:h-8 fill-current text-[#cbff1f]" viewBox="0 0 24 24">
+                          <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+                        </svg>
+                      </div>
+
+                      {/* Testimonial Quote */}
+                      <p className="text-white/90 text-sm sm:text-[14.5px] leading-relaxed font-normal">
+                        "{t.quote}"
+                      </p>
+                    </div>
+
+                    {/* Card Footer: Client Info & Star Rating */}
+                    <div className="mt-6 pt-4 border-t border-white/10 flex flex-col">
+                      <div className="font-bold text-white text-[15px] sm:text-base tracking-tight leading-snug">
+                        {t.clientName}
+                      </div>
+                      <div className="text-xs text-white/60 mt-0.5">
+                        {t.serviceTopic}
+                      </div>
+
+                      {/* Five-Star Rating Element (Displayed when genuine ratings are verified) */}
+                      {t.isVerified && t.rating ? (
+                        <div
+                          className="flex items-center gap-1 mt-2.5"
+                          aria-label={`Avaliação: ${t.rating} de 5 estrelas`}
+                        >
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`w-3.5 h-3.5 ${
+                                i < t.rating!
+                                  ? "text-[#cbff1f] fill-[#cbff1f]"
+                                  : "text-white/20"
+                              }`}
+                              aria-hidden="true"
+                            />
+                          ))}
+                        </div>
+                      ) : null}
+                    </div>
                   </div>
-                </div>
-              </CarouselItem>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+          </Carousel>
+
+          {/* Previous Arrow Button */}
+          <button
+            type="button"
+            onClick={() => api?.scrollPrev()}
+            disabled={!canScrollPrev}
+            aria-label="Depoimento anterior"
+            className="absolute left-0 sm:left-1 lg:-left-2 top-1/2 -translate-y-1/2 z-20 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white border border-[#e5e7eb] shadow-md hover:shadow-lg flex items-center justify-center text-[#cbff1f] transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-25 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#cbff1f]"
+          >
+            <ChevronLeft className="w-6 h-6 text-[#cbff1f] stroke-[2.8]" />
+          </button>
+
+          {/* Next Arrow Button */}
+          <button
+            type="button"
+            onClick={() => api?.scrollNext()}
+            disabled={!canScrollNext}
+            aria-label="Próximo depoimento"
+            className="absolute right-0 sm:right-1 lg:-right-2 top-1/2 -translate-y-1/2 z-20 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white border border-[#e5e7eb] shadow-md hover:shadow-lg flex items-center justify-center text-[#cbff1f] transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-25 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#cbff1f]"
+          >
+            <ChevronRight className="w-6 h-6 text-[#cbff1f] stroke-[2.8]" />
+          </button>
+        </div>
+
+        {/* Pagination Indicators */}
+        {count > 0 && (
+          <div
+            className="flex items-center justify-center gap-2.5 mt-8 sm:mt-10"
+            role="tablist"
+            aria-label="Indicadores dos depoimentos"
+          >
+            {Array.from({ length: count }).map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                role="tab"
+                aria-selected={current === i}
+                aria-label={`Ir para slide ${i + 1}`}
+                onClick={() => api?.scrollTo(i)}
+                className={`transition-all duration-300 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#cbff1f] ${
+                  current === i
+                    ? "w-3 h-3 bg-[#cbff1f] shadow-[0_0_8px_rgba(203,255,31,0.5)]"
+                    : "w-2.5 h-2.5 bg-[#d1d5db] hover:bg-[#9ca3af]"
+                }`}
+              />
             ))}
-          </CarouselContent>
-          <div className="hidden md:block">
-            <CarouselPrevious className="-left-4" />
-            <CarouselNext className="-right-4" />
           </div>
-        </Carousel>
+        )}
+
+        {/* Content Safety & Transparency Label */}
+        <p className="text-center text-xs text-[#6b7280] mt-6 max-w-xl mx-auto leading-relaxed">
+          * Depoimentos ilustrativos representativos de atendimentos a microempreendedores (avaliações nominais serão publicadas mediante consentimento dos clientes).
+        </p>
       </div>
     </section>
   );
@@ -1129,33 +1294,30 @@ function Footer() {
 
 /* --------------------------- Floating WhatsApp --------------------------- */
 
+const FLOATING_WHATSAPP_URL = "https://wa.me/5511915470723";
+
 function FloatingWhatsApp() {
-  const [open, setOpen] = useState(true);
   return (
-    <div className="fixed bottom-5 right-5 z-50 flex items-end gap-2">
-      {open && (
-        <div className="hidden sm:flex items-center gap-2 bg-white border border-[#e5e7eb] shadow-xl rounded-full pl-4 pr-2 py-2 animate-fade-up">
-          <span className="text-sm font-medium text-[#111111]">
-            Fale agora com o especialista
-          </span>
-          <button
-            onClick={() => setOpen(false)}
-            aria-label="Fechar"
-            className="h-6 w-6 grid place-items-center rounded-full text-[#6b7280] hover:bg-[#f5f5f5]"
-          >
-            ×
-          </button>
-        </div>
-      )}
-      <a
-        href={waLink}
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="Falar no WhatsApp"
-        className="h-14 w-14 rounded-full bg-[#cbff1f] grid place-items-center shadow-[0_12px_28px_-8px_rgba(203,255,31,0.7)] hover:scale-105 active:scale-95 transition-transform"
-      >
-        <MessageCircle className="h-7 w-7 text-[#111111]" strokeWidth={2.5} />
-      </a>
-    </div>
+    <a
+      href={FLOATING_WHATSAPP_URL}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Fale com o especialista pelo WhatsApp"
+      className="group fixed bottom-5 right-4 sm:bottom-6 sm:right-6 z-50 flex items-center gap-3 select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#25D366] focus-visible:ring-offset-2 rounded-full"
+    >
+      <span className="hidden sm:inline-flex items-center bg-white text-[#111111] text-sm font-semibold px-4 py-2.5 rounded-full border border-[#e5e7eb] shadow-lg transition-all duration-200 group-hover:shadow-xl group-hover:scale-[1.02]">
+        Fale com o especialista
+      </span>
+      <div className="w-14 h-14 rounded-full bg-[#25D366] text-white flex items-center justify-center shadow-lg transition-all duration-200 group-hover:scale-105 group-hover:shadow-[0_8px_25px_rgba(37,211,102,0.45)] active:scale-95 flex-shrink-0">
+        <svg
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          className="w-8 h-8 text-white"
+          aria-hidden="true"
+        >
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413"/>
+        </svg>
+      </div>
+    </a>
   );
 }
