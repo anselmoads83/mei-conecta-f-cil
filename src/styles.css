@@ -22,6 +22,20 @@
   animation: fade-up 0.7s ease-out both;
 }
 
+@keyframes flag-wave {
+  0% { transform: scale(1) rotate(0deg) skewY(0deg); }
+  20% { transform: scale(1.02) rotate(-3deg) skewY(-2deg); }
+  40% { transform: scale(0.99) rotate(2.5deg) skewY(1.5deg); }
+  60% { transform: scale(1.01) rotate(-1.5deg) skewY(-1deg); }
+  80% { transform: scale(1) rotate(1deg) skewY(0.5deg); }
+  100% { transform: scale(1) rotate(0deg) skewY(0deg); }
+}
+
+@utility animate-flag-wave {
+  animation: flag-wave 1.4s ease-in-out;
+  transform-origin: left center;
+}
+
 @utility container-x {
   width: 100%;
   max-width: 1200px;

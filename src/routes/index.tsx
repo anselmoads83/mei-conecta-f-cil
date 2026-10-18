@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   MessageCircle,
   Instagram,
@@ -24,11 +24,22 @@ import {
   ClipboardCheck,
   FileCheck,
   Crown,
+  Award,
+  Users,
+  Laptop,
+  AlertCircle,
+  ArrowLeft,
+  Coins,
+  AlertTriangle,
+  TrendingUp,
+  ShieldAlert,
+  Search,
 } from "lucide-react";
-import anselmoPhoto from "@/assets/images/about-anselmo.jpg";
+import anselmoPortrait from "@/assets/images/anselmo-dias-retrato-profissional.png";
 import anselmoPhotoHero from "@/assets/images/hero-anselmo.jpg";
 import logoImg from "@/assets/images/logo-anselmo-dias.png";
 import heroGeometricImg from "@/assets/images/hero-geometric.png";
+import brazilFlagImg from "@/assets/images/brazil-flag-waving.png";
 import {
   Accordion,
   AccordionContent,
@@ -163,18 +174,16 @@ function LandingPage() {
       <Header />
       <main>
         <Hero />
-        <SectionDivider />
         <SocialProof />
-        <SectionDivider />
         <About />
         <SectionDivider />
         <Services />
         <SectionDivider />
         <Plans />
         <SectionDivider />
-        <Testimonials />
+        <SuccessCases />
         <SectionDivider />
-        <TrustBlock />
+        <Testimonials />
         <SectionDivider />
         <FAQ />
         <SectionDivider />
@@ -232,26 +241,30 @@ function Header() {
           ))}
         </nav>
 
-        {/* Right: WhatsApp CTA & Mobile Toggle */}
-        <div className="flex items-center gap-2 sm:gap-3">
-          {/* Desktop/Tablet WhatsApp Button */}
-          <div className="hidden sm:block">
-            <CtaButton className="!px-5 !py-2.5 !text-sm font-semibold shadow-[0_0_20px_-4px_rgba(203,255,31,0.5)]">
+        {/* Right: Action Buttons & Mobile Toggle */}
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          {/* Action Buttons (Desktop & Tablet) */}
+          <div className="hidden sm:flex items-center gap-2.5 sm:gap-3">
+            <button
+              type="button"
+              disabled
+              aria-disabled="true"
+              title="Em breve"
+              className="inline-flex items-center justify-center rounded-full border border-[#CBFF1F] bg-transparent px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-[#CBFF1F] transition-all duration-200 cursor-not-allowed opacity-90 hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CBFF1F] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+            >
+              Entrar
+            </button>
+            <button
+              type="button"
+              disabled
+              aria-disabled="true"
+              title="Em breve"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-[#CBFF1F] px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-[#111111] shadow-[0_0_20px_-4px_rgba(203,255,31,0.5)] transition-all duration-200 cursor-not-allowed opacity-90 hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CBFF1F] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+            >
               <MessageCircle className="h-4 w-4" />
-              <span>Falar no WhatsApp</span>
-            </CtaButton>
+              <span>Fale Conosco</span>
+            </button>
           </div>
-
-          {/* Compact Mobile WhatsApp Button */}
-          <a
-            href={waLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Falar no WhatsApp"
-            className="sm:hidden inline-flex items-center justify-center w-9 h-9 rounded-full bg-[#cbff1f] text-[#111111] shadow-[0_0_12px_rgba(203,255,31,0.4)] active:scale-95 transition-transform flex-shrink-0"
-          >
-            <MessageCircle className="h-4 w-4" />
-          </a>
 
           {/* Mobile Hamburger Toggle Button */}
           <button
@@ -284,14 +297,26 @@ function Header() {
               </a>
             ))}
           </nav>
-          <div className="pt-2 border-t border-white/10">
-            <CtaButton
-              className="w-full !py-3 !text-sm font-semibold justify-center"
-              onClick={() => setMobileMenuOpen(false)}
+          <div className="pt-3 border-t border-white/10 flex flex-col gap-2.5">
+            <button
+              type="button"
+              disabled
+              aria-disabled="true"
+              title="Em breve"
+              className="w-full inline-flex items-center justify-center rounded-full border border-[#CBFF1F] bg-transparent py-3 text-sm font-semibold text-[#CBFF1F] transition-all duration-200 cursor-not-allowed opacity-90"
+            >
+              Entrar
+            </button>
+            <button
+              type="button"
+              disabled
+              aria-disabled="true"
+              title="Em breve"
+              className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-[#CBFF1F] py-3 text-sm font-semibold text-[#111111] shadow-[0_0_20px_-4px_rgba(203,255,31,0.5)] transition-all duration-200 cursor-not-allowed opacity-90"
             >
               <MessageCircle className="h-4 w-4" />
-              <span>Falar no WhatsApp</span>
-            </CtaButton>
+              <span>Fale Conosco</span>
+            </button>
           </div>
         </div>
       )}
@@ -361,28 +386,291 @@ function Hero() {
   );
 }
 
-/* ------------------------------ Social Proof ----------------------------- */
+/* ------------------------------ Statistics ------------------------------- */
+
+interface StatConfig {
+  id: string;
+  type: "counter" | "flag";
+  finalValue?: number;
+  formatValue?: (val: number) => string;
+  minWidthCh?: string;
+  staticText?: string;
+  caption: string;
+  icon?: React.ComponentType<{ className?: string }>;
+  ariaLabel: string;
+}
+
+const STATS_ITEMS: StatConfig[] = [
+  {
+    id: "meis-atendidos",
+    type: "counter",
+    finalValue: 800,
+    formatValue: (v) => `+${v}`,
+    minWidthCh: "min-w-[4.2ch]",
+    caption: "MEIS ATENDIDOS",
+    icon: Users,
+    ariaLabel: "Mais de 800 MEIs atendidos",
+  },
+  {
+    id: "obrigacoes-regularizadas",
+    type: "counter",
+    finalValue: 2500,
+    formatValue: (v) => `+${new Intl.NumberFormat("pt-BR").format(v)}`,
+    minWidthCh: "min-w-[5.8ch]",
+    caption: "OBRIGAÇÕES REGULARIZADAS",
+    icon: FileText,
+    ariaLabel: "Mais de 2.500 obrigações regularizadas",
+  },
+  {
+    id: "atendimento-digital",
+    type: "counter",
+    finalValue: 100,
+    formatValue: (v) => `${v}%`,
+    minWidthCh: "min-w-[4.2ch]",
+    caption: "ATENDIMENTO DIGITAL",
+    icon: Laptop,
+    ariaLabel: "100% atendimento digital",
+  },
+  {
+    id: "atendimento-nacional",
+    type: "flag",
+    staticText: "BR",
+    caption: "ATENDIMENTO NACIONAL",
+    ariaLabel: "Atendimento nacional em todo o Brasil",
+  },
+];
+
+function StatIndicator({
+  item,
+  index,
+  isInView,
+  prefersReducedMotion,
+}: {
+  item: StatConfig;
+  index: number;
+  isInView: boolean;
+  prefersReducedMotion: boolean;
+}) {
+  const [count, setCount] = useState<number>(() =>
+    prefersReducedMotion ? (item.finalValue ?? 0) : 0
+  );
+  const [flagWaving, setFlagWaving] = useState(false);
+  const rafRef = useRef<number | null>(null);
+
+  // Smooth counter animation using Ease-Out Cubic
+  const runCounterAnimation = useCallback(() => {
+    if (prefersReducedMotion || item.finalValue === undefined) {
+      setCount(item.finalValue ?? 0);
+      return;
+    }
+
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+
+    const duration = 1500; // ~1.5 seconds
+    const startVal = 0;
+    const endVal = item.finalValue;
+    let startTime: number | null = null;
+
+    const animate = (currentTime: number) => {
+      if (startTime === null) startTime = currentTime;
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+
+      // Ease-out cubic: fast start, soft and natural landing
+      const easeOutProgress = 1 - Math.pow(1 - progress, 3);
+      const current = Math.round(startVal + (endVal - startVal) * easeOutProgress);
+      setCount(current);
+
+      if (progress < 1) {
+        rafRef.current = requestAnimationFrame(animate);
+      } else {
+        rafRef.current = null;
+      }
+    };
+
+    rafRef.current = requestAnimationFrame(animate);
+  }, [item.finalValue, prefersReducedMotion]);
+
+  // Gentle waving animation trigger for Brazilian flag
+  const runFlagAnimation = useCallback(() => {
+    if (prefersReducedMotion) return;
+    setFlagWaving(false);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setFlagWaving(true);
+      });
+    });
+  }, [prefersReducedMotion]);
+
+  // Initial animation trigger when section enters viewport
+  useEffect(() => {
+    if (isInView) {
+      if (item.type === "counter") {
+        runCounterAnimation();
+      } else if (item.type === "flag") {
+        runFlagAnimation();
+      }
+    }
+
+    return () => {
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current);
+      }
+    };
+  }, [isInView, item.type, runCounterAnimation, runFlagAnimation]);
+
+  // Mouse hover: restart only this specific indicator
+  const handleMouseEnter = () => {
+    if (item.type === "counter") {
+      runCounterAnimation();
+    } else if (item.type === "flag") {
+      runFlagAnimation();
+    }
+  };
+
+  const IconComponent = item.icon;
+
+  return (
+    <div
+      onMouseEnter={handleMouseEnter}
+      role="group"
+      aria-label={item.ariaLabel}
+      className="relative flex flex-col items-center justify-center py-4 lg:py-6 px-3 group select-none cursor-default transition-all duration-200"
+    >
+      {/* Screen reader only persistent text */}
+      <span className="sr-only">{item.ariaLabel}</span>
+
+      {/* Visual content: Icon + Number OR BR + Brazilian Flag */}
+      <div
+        aria-hidden="true"
+        className="flex items-center justify-center gap-2.5 sm:gap-3.5"
+      >
+        {/* Lucide Outline Icon */}
+        {IconComponent && (
+          <IconComponent className="w-8 h-8 sm:w-9 sm:h-9 lg:w-10 lg:h-10 text-[#84cc16] stroke-[2.2] flex-shrink-0" />
+        )}
+
+        {/* Dynamic Numerical Counter */}
+        {item.type === "counter" && item.formatValue && (
+          <span
+            className={`font-black text-3xl sm:text-4xl lg:text-[40px] xl:text-[44px] text-[#000000] tracking-tight tabular-nums inline-block text-left ${
+              item.minWidthCh ?? ""
+            }`}
+          >
+            {item.formatValue(count)}
+          </span>
+        )}
+
+        {/* BR Indicator + Waving Brazilian Flag */}
+        {item.type === "flag" && (
+          <>
+            <span className="font-black text-3xl sm:text-4xl lg:text-[40px] xl:text-[44px] text-[#000000] tracking-tight">
+              {item.staticText}
+            </span>
+            <img
+              src={brazilFlagImg}
+              alt=""
+              width={115}
+              height={66}
+              className={`w-12 sm:w-14 lg:w-[58px] h-auto object-contain flex-shrink-0 origin-left drop-shadow-sm select-none pointer-events-none ${
+                flagWaving ? "animate-flag-wave" : ""
+              }`}
+              onAnimationEnd={() => setFlagWaving(false)}
+            />
+          </>
+        )}
+      </div>
+
+      {/* Elegant Uppercase Caption */}
+      <div
+        aria-hidden="true"
+        className="text-[10.5px] xs:text-[11px] sm:text-xs font-semibold tracking-[0.14em] text-[#6b7280] uppercase mt-2.5 text-center leading-tight"
+      >
+        {item.caption}
+      </div>
+
+      {/* Subtle light-gray vertical divider on Desktop (between columns 0-1, 1-2, 2-3) */}
+      {index < 3 && (
+        <div
+          aria-hidden="true"
+          className="hidden lg:block absolute right-0 top-1/2 -translate-y-1/2 w-[1px] h-12 sm:h-14 bg-gray-200/90 pointer-events-none"
+        />
+      )}
+
+      {/* Subtle light-gray vertical divider on Tablet/Mobile 2-column layout (left column) */}
+      {index % 2 === 0 && (
+        <div
+          aria-hidden="true"
+          className="block lg:hidden absolute right-0 top-1/2 -translate-y-1/2 w-[1px] h-11 bg-gray-200/90 pointer-events-none"
+        />
+      )}
+    </div>
+  );
+}
 
 function SocialProof() {
-  const stats = [
-    { value: "+800", label: "MEIs Atendidos" },
-    { value: "+1.000", label: "Obrigações Regularizadas" },
-    { value: "100%", label: "Atendimento Digital" },
-    { value: "BR", label: "Atendimento Nacional" },
-  ];
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const [isInView, setIsInView] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+
+  // Monitor user preference for reduced motion
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefersReducedMotion(mediaQuery.matches);
+
+    const handleMotionChange = (e: MediaQueryListEvent) => {
+      setPrefersReducedMotion(e.matches);
+    };
+
+    mediaQuery.addEventListener("change", handleMotionChange);
+    return () => mediaQuery.removeEventListener("change", handleMotionChange);
+  }, []);
+
+  // Viewport intersection observer: trigger once on scroll entry
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsInView(true);
+          observer.disconnect(); // Trigger automatically only once on initial entry
+        }
+      },
+      {
+        threshold: 0.2,
+      }
+    );
+
+    observer.observe(el);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
   return (
-    <section className="bg-[#fafafa]">
-      <div className="container-x py-10 grid grid-cols-2 md:grid-cols-4 gap-6">
-        {stats.map((s) => (
-          <div key={s.label} className="text-center md:text-left">
-            <div className="text-3xl md:text-4xl font-bold tracking-tight text-[#111111]">
-              {s.value}
-            </div>
-            <div className="text-xs md:text-sm text-[#6b7280] mt-1 uppercase tracking-wider">
-              {s.label}
-            </div>
-          </div>
-        ))}
+    <section
+      ref={sectionRef}
+      id="estatisticas"
+      className="bg-white border-y-[1.5px] border-[#CBFF1F] relative z-20 py-8 sm:py-10 lg:py-12"
+    >
+      <div className="container-x">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-y-8 sm:gap-y-10 lg:gap-y-0">
+          {STATS_ITEMS.map((item, index) => (
+            <StatIndicator
+              key={item.id}
+              item={item}
+              index={index}
+              isInView={isInView}
+              prefersReducedMotion={prefersReducedMotion}
+            />
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -394,53 +682,63 @@ function About() {
   return (
     <section id="quem-somos" className="py-20 md:py-28">
       <div className="container-x grid md:grid-cols-2 gap-12 items-center">
-        <div className="order-2 md:order-1 relative">
-          <div className="rounded-3xl overflow-hidden aspect-square border border-[#111111]/10">
+        <div className="order-2 md:order-1 relative max-w-[460px] mx-auto md:max-w-none w-full">
+          <div className="rounded-3xl overflow-hidden aspect-[3/4] border border-[#111111]/10 shadow-lg bg-[#181a1b]">
             <img
-              src={anselmoPhoto}
-              alt="Anselmo Dias em ambiente profissional"
+              src={anselmoPortrait}
+              alt="Anselmo Dias — Contador e Co-fundador"
               className="w-full h-full object-cover object-top"
               loading="lazy"
-              width={896}
-              height={896}
+              width={768}
+              height={1024}
             />
           </div>
-          <div className="absolute -bottom-6 -right-4 md:-right-6 bg-[#111111] text-white rounded-2xl p-5 max-w-[220px] shadow-xl">
-            <div className="text-[#cbff1f] text-2xl font-bold">+800</div>
-            <div className="text-xs text-white/70">
-              Microempreendedores ajudados pelo Brasil
+          {/* Overlapping Professional Credential Card */}
+          <div className="absolute -bottom-5 right-2 sm:-right-4 md:-right-6 bg-[#000000] text-white rounded-2xl p-4 sm:p-5 shadow-2xl border border-white/10 border-b-2 border-b-[#CBFF1F] flex items-center z-10 select-none">
+            {/* Credential Icon */}
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-[#CBFF1F]/10 border border-[#CBFF1F]/30 flex items-center justify-center text-[#CBFF1F] flex-shrink-0">
+              <Award className="w-5 h-5 sm:w-6 sm:h-6 text-[#CBFF1F]" />
+            </div>
+
+            {/* Vertical Lime-Green Separator */}
+            <div className="h-9 w-px bg-[#CBFF1F] mx-3 sm:mx-3.5 flex-shrink-0" />
+
+            {/* Credential Details */}
+            <div className="flex flex-col justify-center">
+              <div className="font-bold text-white text-xs sm:text-sm tracking-wider uppercase leading-snug">
+                CONTADOR
+              </div>
+              <div className="text-xs sm:text-[13px] font-semibold mt-0.5 tracking-tight flex items-center gap-1.5 whitespace-nowrap leading-snug">
+                <span className="text-[#CBFF1F] font-bold">CRC</span>
+                <span className="text-white font-medium">1SP226494/O-2</span>
+              </div>
             </div>
           </div>
         </div>
         <div className="order-1 md:order-2">
-          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[#6b7280]">
-            Sobre
-          </span>
-          <h2 className="mt-3 text-3xl md:text-5xl font-bold tracking-tight leading-[1.1]">
-            Quem é Anselmo Dias?
+          {/* Main Section Heading */}
+          <h2 className="relative md:-top-[30px] text-xl sm:text-2xl md:text-[28px] lg:text-[30px] font-bold text-[#000000] tracking-tight uppercase mb-8 sm:mb-10 lg:mb-[52px]">
+            QUEM SOMOS
           </h2>
-          <div className="mt-6 space-y-4 text-[#6b7280] leading-relaxed">
-            <p>
-              Sou contador, empreendedor e sócio da <strong className="text-[#111111]">Target Gestão Contábil</strong>.&nbsp;
-              <br />
-              Ao longo da minha trajetória, já ajudei centenas de microempreendedores
-              a regularizar seus negócios, evitar multas e manter seus CNPJs em dia.
-            </p>
-            <p>
-              Acredito que o MEI precisa de orientação <strong className="text-[#111111]">simples, clara e acessível</strong>,
-              sem burocracia e sem linguagem complicada.
-            </p>
-            <p>
-              Por isso, compartilho diariamente conteúdos educativos no Instagram
-              e ofereço suporte especializado para quem precisa resolver problemas
-              do MEI.
-            </p>
+
+          {/* Professional Identification */}
+          <div>
+            <span className="inline-block text-xs sm:text-sm font-bold uppercase tracking-[0.2em] text-[#6b7280]">
+              CEO | CO-FUNDADOR
+            </span>
+            <h3 className="mt-1 text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#111111] tracking-tight">
+              Anselmo Dias
+            </h3>
           </div>
-          <div className="mt-8">
-            <CtaButton variant="dark" href={instagramLink}>
-              <Instagram className="h-4 w-4" />
-              Conhecer Meu Instagram
-            </CtaButton>
+
+          {/* Two-Paragraph Biography */}
+          <div className="mt-6 space-y-4 text-[#4b5563] text-base sm:text-[16.5px] leading-relaxed">
+            <p>
+              Anselmo Dias é especialista em contabilidade para Microempreendedores Individuais (MEIs), com experiência em gestão contábil, orientação empresarial e regularização de negócios. À frente da empresa Anselmo Dias Contador, une conhecimento técnico e visão empreendedora para oferecer soluções contábeis práticas, seguras e acessíveis.
+            </p>
+            <p>
+              Seu propósito é simplificar e democratizar o acesso à contabilidade especializada, descomplicando processos burocráticos e oferecendo orientações claras e personalizadas para que cada microempreendedor tenha mais segurança, tranquilidade e confiança na gestão do seu negócio.
+            </p>
           </div>
         </div>
       </div>
@@ -573,7 +871,7 @@ function Services() {
             <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5 flex-shrink-0" aria-hidden="true">
               <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413"/>
             </svg>
-            <span>QUERO FALAR COM UM ESPECIALISTA</span>
+            <span>FALAR COM UM ESPECIALISTA</span>
             <ArrowRight className="h-5 w-5 stroke-[2.5]" />
           </a>
         </div>
@@ -746,12 +1044,12 @@ function Plans() {
                   {plan.desc}
                 </p>
 
-                <div className="mt-5 mb-1 flex items-baseline">
+                <div className="mt-5 mb-6 flex items-baseline">
                   <span className="text-xl sm:text-2xl font-bold text-white mr-1.5">R$</span>
                   <span className="text-4xl sm:text-5xl font-black text-white tracking-tight">{plan.price}</span>
-                </div>
-                <div className="text-white/60 text-sm font-medium mb-6">
-                  {plan.period}
+                  <span className="text-white/60 text-sm font-medium ml-2">
+                    {plan.period}
+                  </span>
                 </div>
 
                 <div className="h-px w-full bg-white/10 mb-6" />
@@ -791,6 +1089,272 @@ function Plans() {
             </div>
           ))}
         </div>
+      </div>
+    </section>
+  );
+}
+
+/* ---------------------------- Success Cases ----------------------------- */
+
+interface SuccessCaseItem {
+  id: number;
+  number: string;
+  category: string;
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  description: string;
+  situacao: string;
+  atuacao: string;
+}
+
+const SUCCESS_CASES: SuccessCaseItem[] = [
+  {
+    id: 1,
+    number: "01",
+    category: "REGULARIZAÇÃO FISCAL",
+    icon: FileText,
+    title: "MEI COM DÍVIDAS NA RECEITA FEDERAL",
+    description:
+      "Identificamos débitos acumulados, conferimos as competências em aberto e orientamos a regularização fiscal do microempreendedor, com emissão de guias e análise das possibilidades de parcelamento.",
+    situacao: "DAS EM ATRASO",
+    atuacao: "REGULARIZAÇÃO",
+  },
+  {
+    id: 2,
+    number: "02",
+    category: "DÍVIDA ATIVA",
+    icon: Coins,
+    title: "DÉBITOS DO MEI NA PGFN",
+    description:
+      "Realizamos o levantamento das inscrições em Dívida Ativa da União, analisamos as modalidades de negociação disponíveis no portal Regularize e acompanhamos os procedimentos para regularização.",
+    situacao: "PGFN",
+    atuacao: "NEGOCIAÇÃO",
+  },
+  {
+    id: 3,
+    number: "03",
+    category: "OBRIGAÇÕES ACESSÓRIAS",
+    icon: ClipboardCheck,
+    title: "DECLARAÇÕES ANUAIS NÃO ENTREGUES",
+    description:
+      "Identificamos declarações DASN-SIMEI pendentes de exercícios anteriores, levantamos as informações de faturamento e providenciamos sua transmissão para regularizar as obrigações declarativas.",
+    situacao: "DASN-SIMEI",
+    atuacao: "ENTREGA EM ATRASO",
+  },
+  {
+    id: 4,
+    number: "04",
+    category: "RETIFICAÇÃO FISCAL",
+    icon: FilePenLine,
+    title: "FATURAMENTO DECLARADO INCORRETAMENTE",
+    description:
+      "Revisamos declarações anuais transmitidas sem movimento ou com valores divergentes da realidade, apuramos o faturamento efetivo e realizamos as retificações necessárias.",
+    situacao: "FATURAMENTO",
+    atuacao: "RETIFICAÇÃO",
+  },
+  {
+    id: 5,
+    number: "05",
+    category: "DESENQUADRAMENTO",
+    icon: AlertTriangle,
+    title: "DESENQUADRAMENTO DO MEI",
+    description:
+      "Identificamos situações de desenquadramento não percebidas pelo empresário, levantamos as pendências decorrentes da mudança de regime e estruturamos os procedimentos necessários à regularização.",
+    situacao: "SIMEI",
+    atuacao: "MUDANÇA DE REGIME",
+  },
+  {
+    id: 6,
+    number: "06",
+    category: "TRANSIÇÃO EMPRESARIAL",
+    icon: TrendingUp,
+    title: "DO MEI PARA MICROEMPRESA",
+    description:
+      "Orientamos a transição de negócios que deixaram de atender aos requisitos do MEI, avaliando o enquadramento adequado, as obrigações tributárias e os ajustes cadastrais necessários.",
+    situacao: "ME",
+    atuacao: "TRANSIÇÃO",
+  },
+  {
+    id: 7,
+    number: "07",
+    category: "SITUAÇÃO CADASTRAL",
+    icon: ShieldAlert,
+    title: "REGULARIZAÇÃO DE CNPJ INAPTO",
+    description:
+      "Analisamos as causas da inaptidão cadastral, identificamos obrigações e pendências que precisam ser resolvidas e conduzimos os procedimentos de regularização perante os órgãos competentes.",
+    situacao: "CNPJ INAPTO",
+    atuacao: "REGULARIZAÇÃO",
+  },
+  {
+    id: 8,
+    number: "08",
+    category: "DIAGNÓSTICO CONTÁBIL",
+    icon: Search,
+    title: "ANOS DE PENDÊNCIAS FISCAIS ORGANIZADOS",
+    description:
+      "Realizamos um diagnóstico da situação fiscal do empreendedor, reunindo débitos, declarações, informações cadastrais e obrigações pendentes em um plano organizado de regularização.",
+    situacao: "DIAGNÓSTICO",
+    atuacao: "PLANO DE AÇÃO",
+  },
+];
+
+function SuccessCases() {
+  const [api, setApi] = useState<CarouselApi>();
+  const [canScrollPrev, setCanScrollPrev] = useState(false);
+  const [canScrollNext, setCanScrollNext] = useState(false);
+
+  useEffect(() => {
+    if (!api) return;
+
+    const updateCarouselState = () => {
+      setCanScrollPrev(api.canScrollPrev());
+      setCanScrollNext(api.canScrollNext());
+    };
+
+    updateCarouselState();
+    api.on("select", updateCarouselState);
+    api.on("reInit", updateCarouselState);
+
+    return () => {
+      api.off("select", updateCarouselState);
+      api.off("reInit", updateCarouselState);
+    };
+  }, [api]);
+
+  return (
+    <section
+      id="cases-de-sucesso"
+      className="bg-[#000000] text-white py-20 sm:py-24 lg:py-32 relative overflow-hidden"
+    >
+      <div className="container-x relative z-10">
+        {/* Section Header */}
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12 sm:mb-14">
+          <div>
+            {/* Refined Neon-Lime Pill Badge */}
+            <div className="inline-flex items-center gap-2 bg-[#CBFF1F] text-[#000000] text-xs sm:text-[13px] font-black uppercase tracking-wider py-1.5 px-4 rounded-full select-none mb-4">
+              <span>CASES DE SUCESSO</span>
+              <ArrowRight className="w-4 h-4 stroke-[2.8] text-[#000000] flex-shrink-0" aria-hidden="true" />
+            </div>
+
+            {/* Main Heading */}
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight uppercase leading-[1.05]">
+              <span className="text-white">CONHEÇA </span>
+              <span className="text-[#cbff1f]">NOSSOS CASES</span>
+            </h2>
+          </div>
+
+          {/* Navigation Arrows */}
+          <div className="flex items-center gap-3 self-end sm:self-auto select-none">
+            <button
+              type="button"
+              onClick={() => api?.scrollPrev()}
+              disabled={!canScrollPrev}
+              aria-label="Caso anterior"
+              className={`w-12 h-12 sm:w-13 sm:h-13 rounded-full flex items-center justify-center transition-all duration-300 ${
+                canScrollPrev
+                  ? "bg-[#cbff1f] hover:bg-[#b8e818] text-[#000000] hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(203,255,31,0.35)]"
+                  : "border border-white/10 bg-[#0d0f0f] text-white/30 cursor-not-allowed opacity-40 shadow-none"
+              }`}
+            >
+              <ArrowLeft className="w-5 h-5 stroke-[2.5]" />
+            </button>
+            <button
+              type="button"
+              onClick={() => api?.scrollNext()}
+              disabled={!canScrollNext}
+              aria-label="Próximo caso"
+              className={`w-12 h-12 sm:w-13 sm:h-13 rounded-full flex items-center justify-center transition-all duration-300 ${
+                canScrollNext
+                  ? "bg-[#cbff1f] hover:bg-[#b8e818] text-[#000000] hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(203,255,31,0.35)]"
+                  : "border border-white/10 bg-[#0d0f0f] text-white/30 cursor-not-allowed opacity-40 shadow-none"
+              }`}
+            >
+              <ArrowRight className="w-5 h-5 stroke-[2.5]" />
+            </button>
+          </div>
+        </div>
+
+        {/* 8-Card Horizontal Carousel */}
+        <Carousel
+          opts={{
+            align: "start",
+            loop: false,
+            slidesToScroll: 1,
+          }}
+          setApi={setApi}
+          className="w-full"
+        >
+          <CarouselContent
+            viewportClassName="overflow-hidden px-3 py-4 -mx-3 -my-4"
+            className="-ml-4 sm:-ml-5 items-stretch"
+          >
+            {SUCCESS_CASES.map((caseItem) => {
+              const CategoryIcon = caseItem.icon;
+              return (
+                <CarouselItem
+                  key={caseItem.id}
+                  className="pl-4 sm:pl-5 basis-full sm:basis-1/2 lg:basis-1/4 flex flex-col"
+                >
+                  <div className="relative z-0 hover:z-20 h-full rounded-2xl bg-[#0d0f0f] border border-[#272b2b] p-6 sm:p-7 flex flex-col justify-between transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 hover:border-[#cbff1f]/40 hover:shadow-[0_12px_32px_rgba(0,0,0,0.6)] motion-reduce:transform-none motion-reduce:transition-none">
+                    <div className="flex-1 flex flex-col">
+                      {/* Top Header: Category Pill + Background Case Number */}
+                      <div className="flex items-center justify-between gap-3 select-none">
+                        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#cbff1f]/50 bg-black/40 text-[#cbff1f] text-[10.5px] sm:text-[11px] font-bold tracking-wider uppercase">
+                          <CategoryIcon className="w-3.5 h-3.5 text-[#cbff1f] stroke-[2.2] flex-shrink-0" />
+                          <span>{caseItem.category}</span>
+                        </div>
+                        <span className="font-black text-3xl sm:text-4xl text-[#1e2323] tracking-tighter leading-none select-none">
+                          {caseItem.number}
+                        </span>
+                      </div>
+
+                      {/* Case Title */}
+                      <h3 className="text-white font-extrabold text-[17px] sm:text-[18px] lg:text-[19px] tracking-tight leading-snug mt-5 mb-3 uppercase">
+                        {caseItem.title}
+                      </h3>
+
+                      {/* Case Description */}
+                      <p className="text-[#9ca3af] text-[12.5px] sm:text-[13px] leading-[1.55] font-normal">
+                        {caseItem.description}
+                      </p>
+                    </div>
+
+                    {/* Bottom Area Pinned to Bottom */}
+                    <div className="mt-auto">
+                      {/* Thin Divider */}
+                      <div className="h-px w-full bg-white/10 mt-6 mb-5" />
+
+                      {/* Two Columns: SITUAÇÃO and ATUAÇÃO */}
+                      <div className="grid grid-cols-2 gap-3 pt-1">
+                        {/* Column 1: SITUAÇÃO */}
+                        <div className="flex flex-col">
+                          <div className="flex items-center gap-1.5 text-[#6b7280] text-[10px] font-bold uppercase tracking-wider">
+                            <AlertCircle className="w-3.5 h-3.5 text-[#cbff1f] stroke-[2.2] flex-shrink-0" />
+                            <span>SITUAÇÃO</span>
+                          </div>
+                          <div className="text-white font-bold text-xs sm:text-[12.5px] uppercase mt-1 tracking-tight leading-tight">
+                            {caseItem.situacao}
+                          </div>
+                        </div>
+
+                        {/* Column 2: ATUAÇÃO */}
+                        <div className="flex flex-col">
+                          <div className="flex items-center gap-1.5 text-[#6b7280] text-[10px] font-bold uppercase tracking-wider">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-[#cbff1f] stroke-[2.2] flex-shrink-0" />
+                            <span>ATUAÇÃO</span>
+                          </div>
+                          <div className="text-[#cbff1f] font-bold text-xs sm:text-[12.5px] uppercase mt-1 tracking-tight leading-tight">
+                            {caseItem.atuacao}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CarouselItem>
+              );
+            })}
+          </CarouselContent>
+        </Carousel>
       </div>
     </section>
   );
@@ -1053,68 +1617,11 @@ function Testimonials() {
             ))}
           </div>
         )}
-
-        {/* Content Safety & Transparency Label */}
-        <p className="text-center text-xs text-[#6b7280] mt-6 max-w-xl mx-auto leading-relaxed">
-          * Depoimentos ilustrativos representativos de atendimentos a microempreendedores (avaliações nominais serão publicadas mediante consentimento dos clientes).
-        </p>
       </div>
     </section>
   );
 }
 
-/* ------------------------------ Trust Block ------------------------------ */
-
-function TrustBlock() {
-  const items = [
-    "Atendimento Humanizado",
-    "Orientação Personalizada",
-    "Especialista em MEI",
-    "Atendimento Nacional",
-    "Suporte pelo WhatsApp",
-    "Transparência Total",
-  ];
-  return (
-    <section className="py-20 md:py-28">
-      <div className="container-x">
-        <div className="rounded-3xl bg-[#111111] text-white p-8 md:p-14 relative overflow-hidden">
-          <div className="absolute -top-20 -right-20 h-72 w-72 rounded-full bg-[#cbff1f]/20 blur-3xl" />
-          <div className="relative grid lg:grid-cols-[1.2fr_1fr] gap-10 items-center">
-            <div>
-              <span className="inline-block text-xs font-semibold uppercase tracking-[0.18em] text-[#cbff1f] mb-3">
-                Confiança
-              </span>
-              <h2 className="text-3xl md:text-5xl font-bold tracking-tight leading-[1.1]">
-                Você será atendido por um contador de verdade
-              </h2>
-              <p className="mt-5 text-white/70 max-w-xl">
-                Nada de chatbot, atendente terceirizado ou solução genérica.
-                Atendimento direto, pessoal e especializado para o seu MEI.
-              </p>
-              <div className="mt-7">
-                <CtaButton>
-                  <MessageCircle className="h-5 w-5" />
-                  Falar com Especialista
-                </CtaButton>
-              </div>
-            </div>
-            <ul className="grid sm:grid-cols-2 gap-3">
-              {items.map((i) => (
-                <li
-                  key={i}
-                  className="flex items-center gap-3 rounded-xl bg-white/[0.04] border border-white/10 px-4 py-3"
-                >
-                  <CheckCircle2 className="h-5 w-5 text-[#cbff1f] shrink-0" />
-                  <span className="text-sm font-medium">{i}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
 
 /* ----------------------------------- FAQ --------------------------------- */
 
