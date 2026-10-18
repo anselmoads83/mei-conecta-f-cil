@@ -34,6 +34,9 @@ import {
   TrendingUp,
   ShieldAlert,
   Search,
+  Plus,
+  Minus,
+  Clock,
 } from "lucide-react";
 import anselmoPortrait from "@/assets/images/anselmo-dias-retrato-profissional.png";
 import anselmoPhotoHero from "@/assets/images/hero-anselmo.jpg";
@@ -871,7 +874,7 @@ function Services() {
             <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5 flex-shrink-0" aria-hidden="true">
               <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413"/>
             </svg>
-            <span>FALAR COM UM ESPECIALISTA</span>
+            <span>FALAR COM ESPECIALISTA</span>
             <ArrowRight className="h-5 w-5 stroke-[2.5]" />
           </a>
         </div>
@@ -1628,50 +1631,116 @@ function Testimonials() {
 function FAQ() {
   const faqs = [
     {
-      q: "Posso baixar meu MEI com dívidas?",
-      a: "Sim. É possível dar baixa no MEI mesmo com débitos pendentes — mas as dívidas migram para o seu CPF. O ideal é avaliar a melhor estratégia antes de encerrar.",
+      id: "01",
+      q: "Meu MEI está com DAS em atraso. Posso continuar emitindo notas fiscais?",
+      a: "Em regra, sim. O atraso no pagamento do DAS não impede automaticamente a emissão de notas fiscais. Entretanto, os débitos podem gerar encargos, cobrança e outras consequências fiscais. É importante verificar a situação cadastral e fiscal do CNPJ para identificar possíveis restrições e regularizar as pendências.",
     },
     {
-      q: "O DAS atrasado gera problemas no CPF?",
-      a: "Sim. Débitos não pagos podem ser inscritos em Dívida Ativa, gerar restrições e ser cobrados diretamente do CPF do titular.",
+      id: "02",
+      q: "Minha dívida do MEI foi enviada para a Procuradoria-Geral da Fazenda Nacional (PGFN). O que devo fazer?",
+      a: "Quando a dívida é inscrita em Dívida Ativa da União, sua negociação passa a ser realizada pelo portal Regularize, da PGFN. Dependendo das condições do débito e das modalidades disponíveis, pode ser possível parcelar ou negociar a dívida com benefícios específicos. Uma análise individualizada ajuda a identificar a alternativa adequada.",
     },
     {
-      q: "Posso parcelar minhas dívidas?",
-      a: "Sim. Existem diferentes modalidades de parcelamento conforme o tipo de débito. Faço a análise e indico a opção mais vantajosa para você.",
+      id: "03",
+      q: "Entreguei a Declaração Anual do MEI com faturamento errado. Posso corrigir?",
+      a: "Sim. A DASN-SIMEI pode ser retificada para corrigir informações de faturamento declaradas incorretamente, inclusive quando foi transmitida sem movimento, embora tenha ocorrido receita. A correção deve refletir os valores efetivos do período e pode exigir a revisão de outras obrigações fiscais.",
     },
     {
-      q: "Quanto custa regularizar um MEI?",
-      a: "Depende do tamanho e da complexidade da pendência. A orientação inicial é gratuita — após a análise, apresento um valor justo e transparente.",
+      id: "04",
+      q: "Fui desenquadrado do MEI e não sabia. Posso regularizar minha empresa?",
+      a: "Sim. É necessário identificar o motivo e a data de efeito do desenquadramento, verificar possíveis impostos e declarações pendentes e adequar a empresa ao regime tributário correspondente. Dependendo da situação, o negócio poderá continuar como Microempresa (ME), com novas obrigações fiscais e contábeis.",
     },
     {
-      q: "Meu MEI foi desenquadrado. E agora?",
-      a: "É preciso entender o motivo do desenquadramento e avaliar se você migra para outro regime ou regulariza para retornar ao MEI.",
+      id: "05",
+      q: "Meu MEI ultrapassou o limite de faturamento. Preciso mudar para Microempresa?",
+      a: "Depende do valor excedido e do período em que ocorreu. O excesso de faturamento pode exigir o desenquadramento do SIMEI, com efeitos no ano seguinte ou retroativos, conforme o caso. Uma análise contábil permite identificar os impostos devidos e organizar a transição para Microempresa (ME).",
     },
     {
-      q: "Não entreguei a DASN-SIMEI. O que fazer?",
-      a: "É necessário entregar o quanto antes e regularizar a multa. Te ajudo no processo completo, sem complicação.",
+      id: "06",
+      q: "Sou MEI e presto serviços para empresas. Preciso emitir nota fiscal pelo sistema nacional?",
+      a: "Sim. O MEI prestador de serviços deve emitir a Nota Fiscal de Serviços eletrônica (NFS-e) pelo padrão nacional nas operações com pessoas jurídicas. A emissão pode ser realizada pelo Emissor Nacional, inclusive pelo aplicativo, observadas as regras aplicáveis à operação.",
     },
     {
-      q: "Preciso emitir Nota Fiscal?",
-      a: "Para pessoas jurídicas, a emissão é obrigatória. Para pessoas físicas, depende da atividade. Te oriento sobre seu caso específico.",
+      id: "07",
+      q: "É possível voltar a ser MEI após o desenquadramento?",
+      a: "Sim! Dependendo do motivo do desenquadramento, é possível retornar ao MEI, desde que a empresa volte a cumprir todos os requisitos legais, como limite de faturamento, atividades permitidas e demais condições do regime. O reenquadramento não é automático e deve ser solicitado dentro do prazo estabelecido pela Receita Federal, geralmente em janeiro, com efeitos a partir de 1º de janeiro, quando deferido. Por isso, é importante realizar uma análise contábil para verificar a elegibilidade e os procedimentos necessários.",
+    },
+    {
+      id: "08",
+      q: "Meu MEI está sem movimento. Ainda preciso entregar a Declaração Anual?",
+      a: "Sim. Mesmo sem faturamento durante o ano, o MEI deve entregar a DASN-SIMEI, informando receita bruta igual a zero, quando aplicável. A ausência de movimentação não dispensa automaticamente as obrigações fiscais, e declarações anteriores pendentes também devem ser verificadas.",
     },
   ];
+
   return (
-    <section className="py-20 md:py-28 bg-[#fafafa]">
-      <div className="container-x max-w-3xl">
-        <SectionTitle kicker="Dúvidas" title="Perguntas frequentes" />
-        <Accordion type="single" collapsible className="w-full space-y-3">
+    <section id="duvidas" className="py-20 md:py-28 bg-[#FFFFFF] relative">
+      <div className="container-x max-w-4xl mx-auto px-4 sm:px-6">
+        {/* Section Heading */}
+        <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-14">
+          <span className="inline-block bg-[#CBFF1F] text-black text-xs font-bold uppercase tracking-wider px-4 sm:px-5 py-1.5 rounded-full mb-4 sm:mb-5">
+            PERGUNTAS FREQUENTES
+          </span>
+          <h2 className="text-3xl sm:text-4xl md:text-[42px] font-extrabold text-black tracking-tight leading-[1.18]">
+            Tire suas dúvidas<br />
+            sobre o{" "}
+            <span className="bg-[#CBFF1F] text-black px-2.5 py-0.5 rounded-lg inline-block">
+              seu MEI
+            </span>
+          </h2>
+          <p className="mt-4 text-sm sm:text-base md:text-[17px] text-[#4B5563] leading-relaxed max-w-xl mx-auto">
+            Respostas claras e objetivas para as principais dúvidas dos microempreendedores.
+          </p>
+        </div>
+
+        {/* 8 Accordion Items */}
+        <Accordion
+          type="single"
+          collapsible
+          defaultValue="item-0"
+          className="w-full space-y-3 sm:space-y-3.5"
+        >
           {faqs.map((f, i) => (
             <AccordionItem
-              key={i}
+              key={f.id}
               value={`item-${i}`}
-              className="rounded-2xl border border-[#e5e7eb] bg-white px-5 [&[data-state=open]]:border-[#111111]"
+              className="faq-card group rounded-2xl border border-[#E5E7EB] bg-white transition-colors duration-200"
             >
-              <AccordionTrigger className="text-left font-semibold text-[#111111] hover:no-underline py-5">
-                {f.q}
+              <AccordionTrigger
+                hideChevron
+                className="w-full flex items-center justify-between px-5 sm:px-6 py-4 sm:py-5 hover:no-underline text-left cursor-pointer transition-none"
+              >
+                <div className="flex items-center gap-3.5 sm:gap-4 flex-1 min-w-0 pr-3 sm:pr-4">
+                  {/* Circular Number Badge with Hover Zoom Animation */}
+                  <div
+                    className="faq-number-badge w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-black border-2 border-[#CBFF1F] flex items-center justify-center flex-shrink-0 select-none"
+                    aria-hidden="true"
+                  >
+                    <span className="text-[#CBFF1F] font-bold text-xs sm:text-sm tracking-tight">
+                      {f.id}
+                    </span>
+                  </div>
+
+                  {/* Question Text */}
+                  <span className="text-black font-bold text-[14.5px] sm:text-base md:text-[16.5px] leading-snug">
+                    {f.q}
+                  </span>
+                </div>
+
+                {/* Expand / Collapse Circular Icon */}
+                <div
+                  className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-colors duration-200 bg-[#71767B] text-white group-data-[state=open]:bg-[#CBFF1F] group-data-[state=open]:text-black"
+                  aria-hidden="true"
+                >
+                  <Plus className="w-4 h-4 stroke-[3] block group-data-[state=open]:hidden" />
+                  <Minus className="w-4 h-4 stroke-[3] hidden group-data-[state=open]:block" />
+                </div>
               </AccordionTrigger>
-              <AccordionContent className="text-[#6b7280] leading-relaxed pb-5">
-                {f.a}
+
+              <AccordionContent className="overflow-hidden p-0">
+                <div className="mx-5 sm:mx-6 h-px bg-[#F0F2F5]" />
+                <div className="px-5 sm:px-6 pt-4 pb-5 sm:pb-6 text-[#4B5563] text-sm sm:text-[15.5px] leading-relaxed">
+                  {f.a}
+                </div>
               </AccordionContent>
             </AccordionItem>
           ))}
@@ -1684,36 +1753,53 @@ function FAQ() {
 /* ------------------------------- Final CTA ------------------------------- */
 
 function FinalCTA() {
-  const reinforcements = [
-    "Atendimento Online",
-    "Orientação Inicial Gratuita",
-    "Atendimento em todo Brasil",
+  const benefits = [
+    "Contabilidade Especializada",
+    "Atendimento Humanizado",
+    "Para MEIs de todo o Brasil",
   ];
+
   return (
-    <section className="py-20 md:py-28 bg-[#cbff1f] relative overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(40%_60%_at_50%_100%,rgba(0,0,0,0.08),transparent)]" />
-      <div className="container-x relative text-center max-w-3xl">
-        <h2 className="text-3xl md:text-6xl font-bold tracking-tight leading-[1.05] text-[#111111]">
-          Resolva seu MEI antes que o problema fique mais caro
+    <section className="py-20 sm:py-24 md:py-28 lg:py-32 bg-[#CBFF1F] relative">
+      <div className="container-x relative text-center max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 className="text-[26px] sm:text-4xl md:text-5xl lg:text-[54px] font-bold tracking-tight leading-[1.15] text-black max-w-4xl mx-auto">
+          Você cuida do seu negócio.<br className="hidden sm:inline" />
+          {" "}Nós cuidamos da<br className="hidden md:inline" />
+          {" "}contabilidade do seu MEI.
         </h2>
-        <p className="mt-5 text-lg text-[#111111]/75">
-          Receba orientação especializada e descubra os próximos passos para
-          regularizar sua situação.
+
+        <p className="mt-6 sm:mt-7 text-base sm:text-lg md:text-[18px] text-black font-normal leading-relaxed max-w-3xl mx-auto">
+          Menos burocracia, mais tranquilidade para empreender. Conte com uma<br className="hidden md:inline" />{" "}
+          contabilidade especializada para manter seu MEI organizado, regularizado e em dia.
         </p>
-        <div className="mt-9">
-          <CtaButton variant="dark" className="!px-8 !py-4 !text-base">
-            <MessageCircle className="h-5 w-5 text-[#cbff1f]" />
-            Falar com Especialista no WhatsApp
-          </CtaButton>
-        </div>
-        <ul className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-2">
-          {reinforcements.map((r) => (
-            <li
-              key={r}
-              className="flex items-center gap-2 text-sm font-medium text-[#111111]"
+
+        <div className="mt-8 sm:mt-10 flex justify-center">
+          <a
+            href={waLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-3 rounded-full bg-black hover:bg-[#1a1d1e] text-white text-[15px] sm:text-base font-semibold px-7 sm:px-8 py-3.5 sm:py-4 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:ring-offset-[#CBFF1F] shadow-lg"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              className="w-5 h-5 text-[#CBFF1F] flex-shrink-0"
+              aria-hidden="true"
             >
-              <CheckCircle2 className="h-4 w-4" strokeWidth={2.5} />
-              {r}
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413"/>
+            </svg>
+            <span>FALAR COM ESPECIALISTA</span>
+          </a>
+        </div>
+
+        <ul className="mt-8 sm:mt-10 lg:mt-12 flex flex-col sm:flex-row flex-wrap items-center justify-center gap-4 sm:gap-8 lg:gap-10">
+          {benefits.map((benefit) => (
+            <li
+              key={benefit}
+              className="inline-flex items-center gap-2.5 text-sm sm:text-[15px] font-semibold text-black"
+            >
+              <CheckCircle2 className="w-5 h-5 text-black stroke-[2.2] flex-shrink-0" />
+              <span>{benefit}</span>
             </li>
           ))}
         </ul>
@@ -1725,74 +1811,227 @@ function FinalCTA() {
 /* --------------------------------- Footer -------------------------------- */
 
 function Footer() {
+  const contactWhatsApp = "https://wa.me/5511915470723";
+  const contactEmail = "gestao@anselmodiascontador.com.br";
+  const instagramUrl = "https://www.instagram.com/anselmodiascontador/";
+
   return (
-    <footer className="bg-[#111111] text-white pt-16 pb-8">
-      <div className="container-x">
-        <div className="grid md:grid-cols-3 gap-10 pb-12 border-b border-white/10">
-          <div>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="h-9 w-9 rounded-lg bg-[#cbff1f] grid place-items-center">
-                <span className="text-[#111111] font-bold">A</span>
-              </div>
-              <div>
-                <div className="font-semibold">Anselmo Dias Contador</div>
-                <div className="text-xs text-white/60">
-                  Contador Especialista em MEI
-                </div>
-              </div>
-            </div>
-            <p className="text-sm text-white/60 max-w-xs">
-              Atendimento humanizado para microempreendedores em todo o Brasil.
+    <footer className="bg-[#000000] text-white pt-16 sm:pt-20 lg:pt-24 pb-8 sm:pb-10">
+      <div className="container-x max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Main 3 Columns */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1.18fr_1fr_1.08fr] gap-10 lg:gap-0 items-stretch">
+          {/* Column 1 — Official Brand Logo & Summary */}
+          <div className="lg:pr-8 xl:pr-12 flex flex-col justify-start">
+            <a
+              href="#top"
+              className="group inline-block w-[210px] sm:w-[240px] lg:w-[260px] aspect-[644/290] overflow-hidden relative"
+              aria-label="Anselmo Dias Contador - Início"
+            >
+              <img
+                src={logoImg}
+                alt="Anselmo Dias Contador"
+                className="absolute max-w-none w-[127.18%] h-auto left-[-13.35%] top-[-116.21%] transition-transform duration-300 group-hover:scale-[1.03]"
+                loading="lazy"
+              />
+            </a>
+            <p className="mt-5 sm:mt-6 text-[13px] sm:text-[13.5px] lg:text-[14px] text-[#9CA3AF] leading-relaxed">
+              <span className="sm:whitespace-nowrap">Soluções contábeis práticas, seguras e acessíveis</span>
+              <br className="hidden sm:inline" />
+              <span> para microempreendedores de todo o Brasil.</span>
             </p>
           </div>
 
-          <div id="contato">
-            <div className="text-xs font-semibold uppercase tracking-wider text-white/50 mb-4">
-              Contato
+          {/* Column 2 — Contato */}
+          <div
+            id="contato"
+            className="lg:border-x lg:border-white/10 lg:px-10 xl:px-14 flex flex-col justify-start"
+          >
+            <h3 className="text-xs sm:text-[13px] font-bold uppercase tracking-[0.18em] text-[#CBFF1F] mb-6">
+              CONTATO
+            </h3>
+            <div className="space-y-4 sm:space-y-5">
+              {/* WhatsApp */}
+              <a
+                href={contactWhatsApp}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center gap-3.5 transition-colors"
+              >
+                <div className="w-11 h-11 rounded-xl bg-transparent border border-white/10 flex items-center justify-center flex-shrink-0 group-hover:border-[#CBFF1F]/50 transition-colors">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    className="w-5 h-5 text-[#CBFF1F] flex-shrink-0"
+                    aria-hidden="true"
+                  >
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413"/>
+                  </svg>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-[#9CA3AF]">
+                    WHATSAPP
+                  </span>
+                  <span className="text-sm sm:text-base font-bold text-white group-hover:text-[#CBFF1F] transition-colors">
+                    (11) 91547-0723
+                  </span>
+                </div>
+              </a>
+
+              {/* E-mail */}
+              <a
+                href={`mailto:${contactEmail}`}
+                className="group flex items-center gap-3.5 transition-colors"
+              >
+                <div className="w-11 h-11 rounded-xl bg-transparent border border-white/10 flex items-center justify-center flex-shrink-0 group-hover:border-[#CBFF1F]/50 transition-colors">
+                  <Mail className="w-5 h-5 text-[#CBFF1F] stroke-[2]" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-[#9CA3AF]">
+                    E-MAIL
+                  </span>
+                  <span className="text-sm sm:text-base font-bold text-white group-hover:text-[#CBFF1F] transition-colors">
+                    {contactEmail}
+                  </span>
+                </div>
+              </a>
+
+              {/* Localização */}
+              <div className="flex items-center gap-3.5">
+                <div className="w-11 h-11 rounded-xl bg-transparent border border-white/10 flex items-center justify-center flex-shrink-0">
+                  <MapPin className="w-5 h-5 text-[#CBFF1F] stroke-[2]" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-[#9CA3AF]">
+                    LOCALIZAÇÃO
+                  </span>
+                  <span className="text-sm sm:text-base font-bold text-white">
+                    São Paulo / SP
+                  </span>
+                </div>
+              </div>
             </div>
-            <ul className="space-y-3 text-sm">
-              <li>
-                <a
-                  href={waLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 hover:text-[#cbff1f] transition-colors"
-                >
-                  <Phone className="h-4 w-4" /> WhatsApp
-                </a>
-              </li>
-              <li className="flex items-center gap-2 text-white/70">
-                <Mail className="h-4 w-4" /> contato@anselmodias.com.br
-              </li>
-              <li className="flex items-center gap-2 text-white/70">
-                <MapPin className="h-4 w-4" /> São Paulo / SP
-              </li>
-              <li className="text-white/50 text-xs pt-2">CRC: 0000000/0-0</li>
-            </ul>
           </div>
 
-          <div>
-            <div className="text-xs font-semibold uppercase tracking-wider text-white/50 mb-4">
-              Redes Sociais
+          {/* Column 3 — Atendimento & Redes Sociais */}
+          <div className="lg:pl-10 xl:pl-14 flex flex-col justify-start">
+            <h3 className="text-xs sm:text-[13px] font-bold uppercase tracking-[0.18em] text-[#CBFF1F] mb-6">
+              ATENDIMENTO
+            </h3>
+            <div className="space-y-4 sm:space-y-5">
+              {/* Horário */}
+              <div className="flex items-center gap-3.5">
+                <div className="w-11 h-11 rounded-xl bg-transparent border border-white/10 flex items-center justify-center flex-shrink-0">
+                  <Clock className="w-5 h-5 text-[#CBFF1F] stroke-[2]" />
+                </div>
+                <div className="text-sm sm:text-[14.5px] font-medium text-white leading-snug">
+                  Segunda a sexta-feira,
+                  <br />
+                  das 09:00 às 18:00
+                </div>
+              </div>
+
+              {/* Registro Profissional */}
+              <div className="flex items-center gap-3.5">
+                <div className="w-11 h-11 rounded-xl bg-transparent border border-white/10 flex items-center justify-center flex-shrink-0">
+                  <Award className="w-5 h-5 text-[#CBFF1F] stroke-[2]" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-[#9CA3AF]">
+                    REGISTRO PROFISSIONAL
+                  </span>
+                  <span className="text-sm sm:text-base font-bold text-white">
+                    CRC: 1SP226494/O-2
+                  </span>
+                </div>
+              </div>
             </div>
-            <a
-              href={instagramLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-full border border-white/15 px-4 py-2 text-sm hover:bg-white/5 transition-colors"
-            >
-              <Instagram className="h-4 w-4" />
-              @anselmodiascontador
-            </a>
+
+            {/* Subtle Divider */}
+            <div className="w-full h-px bg-white/10 my-6" />
+
+            {/* Redes Sociais Heading */}
+            <h3 className="text-xs sm:text-[13px] font-bold uppercase tracking-[0.18em] text-[#CBFF1F] mb-4">
+              REDES SOCIAIS
+            </h3>
+
+            {/* 3 Full-color Social Icons */}
+            <div className="flex items-center gap-3.5">
+              {/* Instagram */}
+              <a
+                href={instagramUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+                className="group block rounded-[14px] overflow-hidden transition-transform duration-200 ease-out hover:scale-[1.08] active:scale-95 will-change-transform"
+              >
+                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-[14px] bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] flex items-center justify-center shadow-md">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="w-6 h-6 text-white"
+                    aria-hidden="true"
+                  >
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+                  </svg>
+                </div>
+              </a>
+
+              {/* Facebook */}
+              <a
+                href="#"
+                onClick={(e) => e.preventDefault()}
+                aria-label="Facebook"
+                className="group block rounded-[14px] overflow-hidden transition-transform duration-200 ease-out hover:scale-[1.08] active:scale-95 will-change-transform"
+              >
+                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-[14px] bg-[#1877F2] flex items-center justify-center shadow-md">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    className="w-6 h-6 text-white translate-x-0.5 translate-y-0.5"
+                    aria-hidden="true"
+                  >
+                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                  </svg>
+                </div>
+              </a>
+
+              {/* WhatsApp */}
+              <a
+                href={contactWhatsApp}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="WhatsApp"
+                className="group block rounded-[14px] overflow-hidden transition-transform duration-200 ease-out hover:scale-[1.08] active:scale-95 will-change-transform"
+              >
+                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-[14px] bg-[#25D366] flex items-center justify-center shadow-md">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    className="w-6 h-6 text-white"
+                    aria-hidden="true"
+                  >
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413" />
+                  </svg>
+                </div>
+              </a>
+            </div>
           </div>
         </div>
 
-        <div className="pt-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-xs text-white/50">
-          <p className="max-w-2xl leading-relaxed">
-            As orientações são realizadas de forma personalizada conforme a
-            situação de cada contribuinte e a legislação vigente.
+        {/* Thin Horizontal Divider beneath the 3 columns */}
+        <div className="w-full h-px bg-white/10 mt-12 sm:mt-14 lg:mt-16 mb-6 sm:mb-8" />
+
+        {/* Copyright Area */}
+        <div className="text-center lg:text-right">
+          <p className="text-xs sm:text-sm text-[#9CA3AF]">
+            © 2026 Anselmo Dias Contador. Todos os direitos reservados.
           </p>
-          <p>© {new Date().getFullYear()} Anselmo Dias Contador.</p>
         </div>
       </div>
     </footer>
