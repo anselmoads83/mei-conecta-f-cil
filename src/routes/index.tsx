@@ -1298,11 +1298,11 @@ function SuccessCases() {
                   key={caseItem.id}
                   className="pl-4 sm:pl-5 basis-full sm:basis-1/2 lg:basis-1/4 flex flex-col"
                 >
-                  <div className="relative z-0 hover:z-20 h-full rounded-2xl bg-[#0d0f0f] border border-[#272b2b] p-6 sm:p-7 flex flex-col justify-between transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 hover:border-[#cbff1f]/40 hover:shadow-[0_12px_32px_rgba(0,0,0,0.6)] motion-reduce:transform-none motion-reduce:transition-none">
+                  <div className="relative z-0 hover:z-20 h-full rounded-2xl bg-[#0d0f0f] border border-[#272b2b] p-6 sm:p-7 lg:p-5 xl:p-7 flex flex-col justify-between transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 hover:border-[#cbff1f]/40 hover:shadow-[0_12px_32px_rgba(0,0,0,0.6)] motion-reduce:transform-none motion-reduce:transition-none">
                     <div className="flex-1 flex flex-col">
                       {/* Top Header: Category Pill + Background Case Number */}
-                      <div className="flex items-center justify-between gap-3 select-none">
-                        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#cbff1f]/50 bg-black/40 text-[#cbff1f] text-[10.5px] sm:text-[11px] font-bold tracking-wider uppercase">
+                      <div className="flex items-center justify-between gap-2 xl:gap-3 select-none">
+                        <div className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full border border-[#cbff1f]/50 bg-black/40 text-[#cbff1f] text-[10px] sm:text-[10.5px] xl:text-[11px] font-bold tracking-wider uppercase">
                           <CategoryIcon className="w-3.5 h-3.5 text-[#cbff1f] stroke-[2.2] flex-shrink-0" />
                           <span>{caseItem.category}</span>
                         </div>
@@ -1312,12 +1312,12 @@ function SuccessCases() {
                       </div>
 
                       {/* Case Title */}
-                      <h3 className="text-white font-extrabold text-[17px] sm:text-[18px] lg:text-[19px] tracking-tight leading-snug mt-5 mb-3 uppercase">
+                      <h3 className="text-white font-extrabold text-[16px] sm:text-[18px] lg:text-[17px] xl:text-[19px] tracking-tight leading-snug mt-4 xl:mt-5 mb-2.5 xl:mb-3 uppercase">
                         {caseItem.title}
                       </h3>
 
                       {/* Case Description */}
-                      <p className="text-[#9ca3af] text-[12.5px] sm:text-[13px] leading-[1.55] font-normal">
+                      <p className="text-[#9ca3af] text-[12px] sm:text-[13px] leading-[1.55] font-normal">
                         {caseItem.description}
                       </p>
                     </div>
@@ -1325,28 +1325,28 @@ function SuccessCases() {
                     {/* Bottom Area Pinned to Bottom */}
                     <div className="mt-auto">
                       {/* Thin Divider */}
-                      <div className="h-px w-full bg-white/10 mt-6 mb-5" />
+                      <div className="h-px w-full bg-white/10 mt-5 xl:mt-6 mb-4 xl:mb-5" />
 
                       {/* Two Columns: SITUAÇÃO and ATUAÇÃO */}
-                      <div className="grid grid-cols-2 gap-3 pt-1">
+                      <div className="grid grid-cols-2 gap-2 xl:gap-3 pt-1">
                         {/* Column 1: SITUAÇÃO */}
-                        <div className="flex flex-col">
-                          <div className="flex items-center gap-1.5 text-[#6b7280] text-[10px] font-bold uppercase tracking-wider">
-                            <AlertCircle className="w-3.5 h-3.5 text-[#cbff1f] stroke-[2.2] flex-shrink-0" />
+                        <div className="flex flex-col min-w-0">
+                          <div className="flex items-center gap-1 xl:gap-1.5 text-[#6b7280] text-[9.5px] sm:text-[10px] font-bold uppercase tracking-wider">
+                            <AlertCircle className="w-3 h-3 xl:w-3.5 xl:h-3.5 text-[#cbff1f] stroke-[2.2] flex-shrink-0" />
                             <span>SITUAÇÃO</span>
                           </div>
-                          <div className="text-white font-bold text-xs sm:text-[12.5px] uppercase mt-1 tracking-tight leading-tight">
+                          <div className="text-white font-bold text-[11px] sm:text-xs xl:text-[12.5px] uppercase mt-1 tracking-tight leading-tight">
                             {caseItem.situacao}
                           </div>
                         </div>
 
                         {/* Column 2: ATUAÇÃO */}
-                        <div className="flex flex-col">
-                          <div className="flex items-center gap-1.5 text-[#6b7280] text-[10px] font-bold uppercase tracking-wider">
-                            <CheckCircle2 className="w-3.5 h-3.5 text-[#cbff1f] stroke-[2.2] flex-shrink-0" />
+                        <div className="flex flex-col min-w-0">
+                          <div className="flex items-center gap-1 xl:gap-1.5 text-[#6b7280] text-[9.5px] sm:text-[10px] font-bold uppercase tracking-wider">
+                            <CheckCircle2 className="w-3 h-3 xl:w-3.5 xl:h-3.5 text-[#cbff1f] stroke-[2.2] flex-shrink-0" />
                             <span>ATUAÇÃO</span>
                           </div>
-                          <div className="text-[#cbff1f] font-bold text-xs sm:text-[12.5px] uppercase mt-1 tracking-tight leading-tight">
+                          <div className="text-[#cbff1f] font-bold text-[11px] sm:text-xs xl:text-[12.5px] uppercase mt-1 tracking-tight leading-tight">
                             {caseItem.atuacao}
                           </div>
                         </div>
@@ -1819,12 +1819,12 @@ function Footer() {
     <footer className="bg-[#000000] text-white pt-16 sm:pt-20 lg:pt-24 pb-8 sm:pb-10">
       <div className="container-x max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Main 3 Columns */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1.18fr_1fr_1.08fr] gap-10 lg:gap-0 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_1.05fr_1fr] xl:grid-cols-[1.18fr_1fr_1.08fr] gap-10 lg:gap-0 items-stretch">
           {/* Column 1 — Official Brand Logo & Summary */}
-          <div className="lg:pr-8 xl:pr-12 flex flex-col justify-start">
+          <div className="lg:pr-6 xl:pr-12 flex flex-col justify-start min-w-0">
             <a
               href="#top"
-              className="group inline-block w-[210px] sm:w-[240px] lg:w-[260px] aspect-[644/290] overflow-hidden relative"
+              className="group inline-block w-[210px] sm:w-[240px] lg:w-[230px] xl:w-[260px] aspect-[644/290] overflow-hidden relative"
               aria-label="Anselmo Dias Contador - Início"
             >
               <img
@@ -1834,9 +1834,9 @@ function Footer() {
                 loading="lazy"
               />
             </a>
-            <p className="mt-5 sm:mt-6 text-[13px] sm:text-[13.5px] lg:text-[14px] text-[#9CA3AF] leading-relaxed">
-              <span className="sm:whitespace-nowrap">Soluções contábeis práticas, seguras e acessíveis</span>
-              <br className="hidden sm:inline" />
+            <p className="mt-5 sm:mt-6 text-[13px] sm:text-[13.5px] lg:text-[13px] xl:text-[14px] text-[#9CA3AF] leading-relaxed">
+              <span className="xl:whitespace-nowrap">Soluções contábeis práticas, seguras e acessíveis</span>
+              <br className="hidden xl:inline" />
               <span> para microempreendedores de todo o Brasil.</span>
             </p>
           </div>
@@ -1844,7 +1844,7 @@ function Footer() {
           {/* Column 2 — Contato */}
           <div
             id="contato"
-            className="lg:border-x lg:border-white/10 lg:px-10 xl:px-14 flex flex-col justify-start"
+            className="lg:border-x lg:border-white/10 lg:px-5 xl:px-14 flex flex-col justify-start min-w-0"
           >
             <h3 className="text-xs sm:text-[13px] font-bold uppercase tracking-[0.18em] text-[#CBFF1F] mb-6">
               CONTATO
@@ -1855,9 +1855,9 @@ function Footer() {
                 href={contactWhatsApp}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group flex items-center gap-3.5 transition-colors"
+                className="group flex items-center gap-3 xl:gap-3.5 transition-colors min-w-0"
               >
-                <div className="w-11 h-11 rounded-xl bg-transparent border border-white/10 flex items-center justify-center flex-shrink-0 group-hover:border-[#CBFF1F]/50 transition-colors">
+                <div className="w-10 h-10 xl:w-11 xl:h-11 rounded-xl bg-transparent border border-white/10 flex items-center justify-center flex-shrink-0 group-hover:border-[#CBFF1F]/50 transition-colors">
                   <svg
                     viewBox="0 0 24 24"
                     fill="currentColor"
@@ -1871,7 +1871,7 @@ function Footer() {
                   <span className="text-xs font-semibold uppercase tracking-wider text-[#9CA3AF]">
                     WHATSAPP
                   </span>
-                  <span className="text-sm sm:text-base font-bold text-white group-hover:text-[#CBFF1F] transition-colors">
+                  <span className="text-sm xl:text-base font-bold text-white group-hover:text-[#CBFF1F] transition-colors whitespace-nowrap">
                     (11) 91547-0723
                   </span>
                 </div>
@@ -1880,31 +1880,31 @@ function Footer() {
               {/* E-mail */}
               <a
                 href={`mailto:${contactEmail}`}
-                className="group flex items-center gap-3.5 transition-colors"
+                className="group flex items-center gap-3 xl:gap-3.5 transition-colors min-w-0"
               >
-                <div className="w-11 h-11 rounded-xl bg-transparent border border-white/10 flex items-center justify-center flex-shrink-0 group-hover:border-[#CBFF1F]/50 transition-colors">
+                <div className="w-10 h-10 xl:w-11 xl:h-11 rounded-xl bg-transparent border border-white/10 flex items-center justify-center flex-shrink-0 group-hover:border-[#CBFF1F]/50 transition-colors">
                   <Mail className="w-5 h-5 text-[#CBFF1F] stroke-[2]" />
                 </div>
-                <div className="flex flex-col">
+                <div className="flex flex-col min-w-0">
                   <span className="text-xs font-semibold uppercase tracking-wider text-[#9CA3AF]">
                     E-MAIL
                   </span>
-                  <span className="text-sm sm:text-base font-bold text-white group-hover:text-[#CBFF1F] transition-colors">
-                    {contactEmail}
+                  <span className="text-[12.5px] sm:text-sm lg:text-xs xl:text-sm 2xl:text-base font-bold text-white group-hover:text-[#CBFF1F] transition-colors [overflow-wrap:anywhere] break-words">
+                    gestao<wbr />@anselmodiascontador<wbr />.com.br
                   </span>
                 </div>
               </a>
 
               {/* Localização */}
-              <div className="flex items-center gap-3.5">
-                <div className="w-11 h-11 rounded-xl bg-transparent border border-white/10 flex items-center justify-center flex-shrink-0">
+              <div className="flex items-center gap-3 xl:gap-3.5 min-w-0">
+                <div className="w-10 h-10 xl:w-11 xl:h-11 rounded-xl bg-transparent border border-white/10 flex items-center justify-center flex-shrink-0">
                   <MapPin className="w-5 h-5 text-[#CBFF1F] stroke-[2]" />
                 </div>
-                <div className="flex flex-col">
+                <div className="flex flex-col min-w-0">
                   <span className="text-xs font-semibold uppercase tracking-wider text-[#9CA3AF]">
                     LOCALIZAÇÃO
                   </span>
-                  <span className="text-sm sm:text-base font-bold text-white">
+                  <span className="text-sm xl:text-base font-bold text-white whitespace-nowrap">
                     São Paulo / SP
                   </span>
                 </div>
@@ -1913,17 +1913,17 @@ function Footer() {
           </div>
 
           {/* Column 3 — Atendimento & Redes Sociais */}
-          <div className="lg:pl-10 xl:pl-14 flex flex-col justify-start">
+          <div className="lg:pl-5 xl:pl-14 flex flex-col justify-start min-w-0">
             <h3 className="text-xs sm:text-[13px] font-bold uppercase tracking-[0.18em] text-[#CBFF1F] mb-6">
               ATENDIMENTO
             </h3>
             <div className="space-y-4 sm:space-y-5">
               {/* Horário */}
-              <div className="flex items-center gap-3.5">
-                <div className="w-11 h-11 rounded-xl bg-transparent border border-white/10 flex items-center justify-center flex-shrink-0">
+              <div className="flex items-center gap-3 xl:gap-3.5 min-w-0">
+                <div className="w-10 h-10 xl:w-11 xl:h-11 rounded-xl bg-transparent border border-white/10 flex items-center justify-center flex-shrink-0">
                   <Clock className="w-5 h-5 text-[#CBFF1F] stroke-[2]" />
                 </div>
-                <div className="text-sm sm:text-[14.5px] font-medium text-white leading-snug">
+                <div className="text-[12.5px] sm:text-sm xl:text-[14.5px] font-medium text-white leading-snug">
                   Segunda a sexta-feira,
                   <br />
                   das 09:00 às 18:00
@@ -1931,15 +1931,15 @@ function Footer() {
               </div>
 
               {/* Registro Profissional */}
-              <div className="flex items-center gap-3.5">
-                <div className="w-11 h-11 rounded-xl bg-transparent border border-white/10 flex items-center justify-center flex-shrink-0">
+              <div className="flex items-center gap-3 xl:gap-3.5 min-w-0">
+                <div className="w-10 h-10 xl:w-11 xl:h-11 rounded-xl bg-transparent border border-white/10 flex items-center justify-center flex-shrink-0">
                   <Award className="w-5 h-5 text-[#CBFF1F] stroke-[2]" />
                 </div>
-                <div className="flex flex-col">
+                <div className="flex flex-col min-w-0">
                   <span className="text-xs font-semibold uppercase tracking-wider text-[#9CA3AF]">
                     REGISTRO PROFISSIONAL
                   </span>
-                  <span className="text-sm sm:text-base font-bold text-white">
+                  <span className="text-xs sm:text-sm xl:text-base font-bold text-white whitespace-nowrap">
                     CRC: 1SP226494/O-2
                   </span>
                 </div>
@@ -1955,7 +1955,7 @@ function Footer() {
             </h3>
 
             {/* 3 Full-color Social Icons */}
-            <div className="flex items-center gap-3.5">
+            <div className="flex items-center gap-3 xl:gap-3.5">
               {/* Instagram */}
               <a
                 href={instagramUrl}
@@ -1964,7 +1964,7 @@ function Footer() {
                 aria-label="Instagram"
                 className="group block rounded-[14px] overflow-hidden transition-transform duration-200 ease-out hover:scale-[1.08] active:scale-95 will-change-transform"
               >
-                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-[14px] bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] flex items-center justify-center shadow-md">
+                <div className="w-10 h-10 sm:w-11 sm:h-11 xl:w-12 xl:h-12 rounded-[14px] bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] flex items-center justify-center shadow-md">
                   <svg
                     viewBox="0 0 24 24"
                     fill="none"
@@ -1989,7 +1989,7 @@ function Footer() {
                 aria-label="Facebook"
                 className="group block rounded-[14px] overflow-hidden transition-transform duration-200 ease-out hover:scale-[1.08] active:scale-95 will-change-transform"
               >
-                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-[14px] bg-[#1877F2] flex items-center justify-center shadow-md">
+                <div className="w-10 h-10 sm:w-11 sm:h-11 xl:w-12 xl:h-12 rounded-[14px] bg-[#1877F2] flex items-center justify-center shadow-md">
                   <svg
                     viewBox="0 0 24 24"
                     fill="currentColor"
@@ -2009,7 +2009,7 @@ function Footer() {
                 aria-label="WhatsApp"
                 className="group block rounded-[14px] overflow-hidden transition-transform duration-200 ease-out hover:scale-[1.08] active:scale-95 will-change-transform"
               >
-                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-[14px] bg-[#25D366] flex items-center justify-center shadow-md">
+                <div className="w-10 h-10 sm:w-11 sm:h-11 xl:w-12 xl:h-12 rounded-[14px] bg-[#25D366] flex items-center justify-center shadow-md">
                   <svg
                     viewBox="0 0 24 24"
                     fill="currentColor"
@@ -2028,7 +2028,7 @@ function Footer() {
         <div className="w-full h-px bg-white/10 mt-12 sm:mt-14 lg:mt-16 mb-6 sm:mb-8" />
 
         {/* Copyright Area */}
-        <div className="text-center lg:text-right">
+        <div className="text-center lg:text-right lg:pr-20 xl:pr-0">
           <p className="text-xs sm:text-sm text-[#9CA3AF]">
             © 2026 Anselmo Dias Contador. Todos os direitos reservados.
           </p>
@@ -2051,7 +2051,7 @@ function FloatingWhatsApp() {
       aria-label="Fale com o especialista pelo WhatsApp"
       className="group fixed bottom-5 right-4 sm:bottom-6 sm:right-6 z-50 flex items-center gap-3 select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#25D366] focus-visible:ring-offset-2 rounded-full"
     >
-      <span className="hidden sm:inline-flex items-center bg-white text-[#111111] text-sm font-semibold px-4 py-2.5 rounded-full border border-[#e5e7eb] shadow-lg transition-all duration-200 group-hover:shadow-xl group-hover:scale-[1.02]">
+      <span className="hidden xl:inline-flex items-center bg-white text-[#111111] text-sm font-semibold px-4 py-2.5 rounded-full border border-[#e5e7eb] shadow-lg transition-all duration-200 group-hover:shadow-xl group-hover:scale-[1.02]">
         Fale com o especialista
       </span>
       <div className="w-14 h-14 rounded-full bg-[#25D366] text-white flex items-center justify-center shadow-lg transition-all duration-200 group-hover:scale-105 group-hover:shadow-[0_8px_25px_rgba(37,211,102,0.45)] active:scale-95 flex-shrink-0">
