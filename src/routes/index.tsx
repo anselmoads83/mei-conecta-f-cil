@@ -55,6 +55,7 @@ import {
   CarouselItem,
   type CarouselApi,
 } from "@/components/ui/carousel";
+import { FloatingContactForm } from "@/components/FloatingContactForm";
 
 // Número WhatsApp: (11) 98330-2016
 const WHATSAPP_NUMBER = "5511983302016";
@@ -195,6 +196,7 @@ function LandingPage() {
       <SectionDivider />
       <Footer />
       <FloatingWhatsApp />
+      <FloatingContactForm />
     </div>
   );
 }
@@ -1579,9 +1581,9 @@ function Testimonials() {
             onClick={() => api?.scrollPrev()}
             disabled={!canScrollPrev}
             aria-label="Depoimento anterior"
-            className="absolute left-0 sm:left-1 lg:-left-2 top-1/2 -translate-y-1/2 z-20 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white border border-[#e5e7eb] shadow-md hover:shadow-lg flex items-center justify-center text-[#cbff1f] transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-25 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#cbff1f]"
+            className="absolute left-0 sm:left-1 lg:-left-2 top-1/2 -translate-y-1/2 z-20 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#CBFF1F] border border-black shadow-md hover:shadow-lg flex items-center justify-center text-black transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-25 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black"
           >
-            <ChevronLeft className="w-6 h-6 text-[#cbff1f] stroke-[2.8]" />
+            <ChevronLeft className="w-6 h-6 text-black stroke-[2.8]" />
           </button>
 
           {/* Next Arrow Button */}
@@ -1590,9 +1592,9 @@ function Testimonials() {
             onClick={() => api?.scrollNext()}
             disabled={!canScrollNext}
             aria-label="Próximo depoimento"
-            className="absolute right-0 sm:right-1 lg:-right-2 top-1/2 -translate-y-1/2 z-20 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white border border-[#e5e7eb] shadow-md hover:shadow-lg flex items-center justify-center text-[#cbff1f] transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-25 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#cbff1f]"
+            className="absolute right-0 sm:right-1 lg:-right-2 top-1/2 -translate-y-1/2 z-20 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#CBFF1F] border border-black shadow-md hover:shadow-lg flex items-center justify-center text-black transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-25 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black"
           >
-            <ChevronRight className="w-6 h-6 text-[#cbff1f] stroke-[2.8]" />
+            <ChevronRight className="w-6 h-6 text-black stroke-[2.8]" />
           </button>
         </div>
 
@@ -1819,9 +1821,9 @@ function Footer() {
     <footer className="bg-[#000000] text-white pt-16 sm:pt-20 lg:pt-24 pb-8 sm:pb-10">
       <div className="container-x max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Main 3 Columns */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_1.05fr_1fr] xl:grid-cols-[1.18fr_1fr_1.08fr] gap-10 lg:gap-0 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.25fr_1fr] xl:grid-cols-[1.05fr_1.25fr_0.95fr] gap-10 lg:gap-0 items-stretch">
           {/* Column 1 — Official Brand Logo & Summary */}
-          <div className="lg:pr-6 xl:pr-12 flex flex-col justify-start min-w-0">
+          <div className="lg:pr-6 xl:pr-10 flex flex-col justify-start min-w-0">
             <a
               href="#top"
               className="group inline-block w-[210px] sm:w-[240px] lg:w-[230px] xl:w-[260px] aspect-[644/290] overflow-hidden relative"
@@ -1844,7 +1846,7 @@ function Footer() {
           {/* Column 2 — Contato */}
           <div
             id="contato"
-            className="lg:border-x lg:border-white/10 lg:px-5 xl:px-14 flex flex-col justify-start min-w-0"
+            className="lg:border-x lg:border-white/10 lg:px-6 xl:px-10 flex flex-col justify-start min-w-0"
           >
             <h3 className="text-xs sm:text-[13px] font-bold uppercase tracking-[0.18em] text-[#CBFF1F] mb-6">
               CONTATO
@@ -1889,22 +1891,22 @@ function Footer() {
                   <span className="text-xs font-semibold uppercase tracking-wider text-[#9CA3AF]">
                     E-MAIL
                   </span>
-                  <span className="text-[12.5px] sm:text-sm lg:text-xs xl:text-sm 2xl:text-base font-bold text-white group-hover:text-[#CBFF1F] transition-colors [overflow-wrap:anywhere] break-words">
-                    gestao<wbr />@anselmodiascontador<wbr />.com.br
+                  <span className="text-[12.5px] sm:text-sm lg:text-[13px] xl:text-sm 2xl:text-base font-bold text-white group-hover:text-[#CBFF1F] transition-colors break-words sm:whitespace-nowrap">
+                    gestao@<wbr />anselmodiascontador.com.br
                   </span>
                 </div>
               </a>
 
               {/* Localização */}
-              <div className="flex items-center gap-3 xl:gap-3.5 min-w-0">
-                <div className="w-10 h-10 xl:w-11 xl:h-11 rounded-xl bg-transparent border border-white/10 flex items-center justify-center flex-shrink-0">
+              <div className="group flex items-center gap-3 xl:gap-3.5 transition-colors min-w-0">
+                <div className="w-10 h-10 xl:w-11 xl:h-11 rounded-xl bg-transparent border border-white/10 flex items-center justify-center flex-shrink-0 group-hover:border-[#CBFF1F]/50 transition-colors">
                   <MapPin className="w-5 h-5 text-[#CBFF1F] stroke-[2]" />
                 </div>
                 <div className="flex flex-col min-w-0">
                   <span className="text-xs font-semibold uppercase tracking-wider text-[#9CA3AF]">
                     LOCALIZAÇÃO
                   </span>
-                  <span className="text-sm xl:text-base font-bold text-white whitespace-nowrap">
+                  <span className="text-sm xl:text-base font-bold text-white group-hover:text-[#CBFF1F] transition-colors whitespace-nowrap">
                     São Paulo / SP
                   </span>
                 </div>
@@ -1913,17 +1915,17 @@ function Footer() {
           </div>
 
           {/* Column 3 — Atendimento & Redes Sociais */}
-          <div className="lg:pl-5 xl:pl-14 flex flex-col justify-start min-w-0">
+          <div className="lg:pl-6 xl:pl-10 flex flex-col justify-start min-w-0">
             <h3 className="text-xs sm:text-[13px] font-bold uppercase tracking-[0.18em] text-[#CBFF1F] mb-6">
               ATENDIMENTO
             </h3>
             <div className="space-y-4 sm:space-y-5">
               {/* Horário */}
-              <div className="flex items-center gap-3 xl:gap-3.5 min-w-0">
-                <div className="w-10 h-10 xl:w-11 xl:h-11 rounded-xl bg-transparent border border-white/10 flex items-center justify-center flex-shrink-0">
+              <div className="group flex items-center gap-3 xl:gap-3.5 transition-colors min-w-0">
+                <div className="w-10 h-10 xl:w-11 xl:h-11 rounded-xl bg-transparent border border-white/10 flex items-center justify-center flex-shrink-0 group-hover:border-[#CBFF1F]/50 transition-colors">
                   <Clock className="w-5 h-5 text-[#CBFF1F] stroke-[2]" />
                 </div>
-                <div className="text-[12.5px] sm:text-sm xl:text-[14.5px] font-medium text-white leading-snug">
+                <div className="text-[12.5px] sm:text-sm xl:text-[14.5px] font-medium text-white group-hover:text-[#CBFF1F] transition-colors leading-snug">
                   Segunda a sexta-feira,
                   <br />
                   das 09:00 às 18:00
@@ -1931,15 +1933,15 @@ function Footer() {
               </div>
 
               {/* Registro Profissional */}
-              <div className="flex items-center gap-3 xl:gap-3.5 min-w-0">
-                <div className="w-10 h-10 xl:w-11 xl:h-11 rounded-xl bg-transparent border border-white/10 flex items-center justify-center flex-shrink-0">
+              <div className="group flex items-center gap-3 xl:gap-3.5 transition-colors min-w-0">
+                <div className="w-10 h-10 xl:w-11 xl:h-11 rounded-xl bg-transparent border border-white/10 flex items-center justify-center flex-shrink-0 group-hover:border-[#CBFF1F]/50 transition-colors">
                   <Award className="w-5 h-5 text-[#CBFF1F] stroke-[2]" />
                 </div>
                 <div className="flex flex-col min-w-0">
                   <span className="text-xs font-semibold uppercase tracking-wider text-[#9CA3AF]">
                     REGISTRO PROFISSIONAL
                   </span>
-                  <span className="text-xs sm:text-sm xl:text-base font-bold text-white whitespace-nowrap">
+                  <span className="text-xs sm:text-sm xl:text-base font-bold text-white group-hover:text-[#CBFF1F] transition-colors whitespace-nowrap">
                     CRC: 1SP226494/O-2
                   </span>
                 </div>
@@ -2028,7 +2030,7 @@ function Footer() {
         <div className="w-full h-px bg-white/10 mt-12 sm:mt-14 lg:mt-16 mb-6 sm:mb-8" />
 
         {/* Copyright Area */}
-        <div className="text-center lg:text-right lg:pr-20 xl:pr-0">
+        <div className="text-center lg:text-right lg:pr-24 xl:pr-[380px]">
           <p className="text-xs sm:text-sm text-[#9CA3AF]">
             © 2026 Anselmo Dias Contador. Todos os direitos reservados.
           </p>
