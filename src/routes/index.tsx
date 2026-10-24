@@ -43,6 +43,14 @@ import anselmoPhotoHero from "@/assets/images/hero-anselmo.jpg";
 import logoImg from "@/assets/images/logo-anselmo-dias.png";
 import heroGeometricImg from "@/assets/images/hero-geometric.png";
 import brazilFlagImg from "@/assets/images/brazil-flag-waving.png";
+import marcosAlvesImg from "@/assets/images/testimonials/marcos-alves.png";
+import mayaraSantosImg from "@/assets/images/testimonials/mayara-santos.png";
+import joaoManoelImg from "@/assets/images/testimonials/joao-manoel.png";
+import rodrigoSilvaImg from "@/assets/images/testimonials/rodrigo-silva.png";
+import sheilaRodriguesImg from "@/assets/images/testimonials/sheila-rodrigues.png";
+import antonioFilhoImg from "@/assets/images/testimonials/antonio-filho.png";
+import gustavoPedrosoImg from "@/assets/images/testimonials/gustavo-pedroso.png";
+import nathanOliveiraImg from "@/assets/images/testimonials/nathan-oliveira.png";
 import {
   Accordion,
   AccordionContent,
@@ -63,6 +71,7 @@ const WHATSAPP_MSG = encodeURIComponent(
   "Olá Anselmo! Vim pela landing page e gostaria de uma orientação sobre meu MEI."
 );
 const waLink = `https://wa.me/${WHATSAPP_NUMBER}?text=${WHATSAPP_MSG}`;
+const OFFICIAL_WHATSAPP_URL = "https://wa.me/5511915470723";
 const instagramLink = "https://www.instagram.com/anselmodiascontador/";
 
 export const Route = createFileRoute("/")({
@@ -362,7 +371,7 @@ function Hero() {
 
             <div className="mt-8 sm:mt-10 flex items-center">
               <a
-                href={waLink}
+                href={OFFICIAL_WHATSAPP_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-3 bg-[#CBFF1F] text-[#111111] font-black uppercase text-sm sm:text-base px-7 sm:px-8 py-4 sm:py-4.5 rounded-full shadow-[0_0_30px_rgba(203,255,31,0.5)] hover:shadow-[0_0_45px_rgba(203,255,31,0.7)] hover:bg-[#b8e818] transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] tracking-wide"
@@ -868,7 +877,7 @@ function Services() {
         {/* Section CTA Button */}
         <div className="mt-14 sm:mt-16 flex justify-center">
           <a
-            href={waLink}
+            href={OFFICIAL_WHATSAPP_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-3 bg-[#CBFF1F] hover:bg-[#b8e818] text-[#111111] font-extrabold uppercase text-sm sm:text-base px-8 sm:px-10 py-4 sm:py-4.5 rounded-full shadow-[0_0_30px_rgba(203,255,31,0.45)] hover:shadow-[0_0_45px_rgba(203,255,31,0.65)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 tracking-wide"
@@ -988,8 +997,9 @@ function Plans() {
       )}`,
       services: [
         "Todos os serviços do plano PRO.",
-        "Emissão ilimitada de notas fiscais de serviço (NFS-e).",
-        "Emissão ilimitada de notas fiscais de produto (NF-e).",
+        "Emissão de até 30 notas fiscais de serviço (NFS-e) por mês.",
+        "Emissão de até 30 notas fiscais de produto (NF-e) por mês.",
+        "Notas adicionais ou emitidas pela equipe: R$ 8,50 cada.",
         "Desenquadramento do MEI.",
         "Consultoria para transição do MEI ao Simples Nacional.",
         "Regularização de CNPJ INAPTO.",
@@ -1023,7 +1033,7 @@ function Plans() {
           {plans.map((plan, i) => (
             <div
               key={plan.id}
-              className={`relative flex flex-col justify-between rounded-[28px] p-7 sm:p-8 transition-all duration-300 ease-out hover:-translate-y-1.5 motion-reduce:transform-none motion-reduce:transition-none motion-reduce:animate-none motion-reduce:opacity-100 ${
+              className={`relative flex flex-col justify-between h-full rounded-[28px] p-7 sm:p-8 transition-all duration-300 ease-out hover:-translate-y-1.5 motion-reduce:transform-none motion-reduce:transition-none motion-reduce:animate-none motion-reduce:opacity-100 ${
                 plan.highlighted
                   ? "bg-[#0d0f0f] border-2 border-[#cbff1f]"
                   : "bg-[#0d0f0f] border border-[#272b2b] hover:border-white/20"
@@ -1375,6 +1385,7 @@ interface TestimonialItem {
   quote: string;
   rating?: number;
   isVerified?: boolean;
+  photo?: string;
 }
 
 function Testimonials() {
@@ -1414,6 +1425,7 @@ function Testimonials() {
         "Eu tinha muitas dúvidas sobre como abrir meu MEI, mas fui muito bem orientado. O processo foi rápido, simples e sem complicações.",
       rating: 5,
       isVerified: false,
+      photo: marcosAlvesImg,
     },
     {
       id: 2,
@@ -1424,6 +1436,7 @@ function Testimonials() {
         "Atendimento excelente! Todas as minhas dúvidas foram esclarecidas com paciência e atenção. É muito bom contar com um profissional que realmente se preocupa com o cliente.",
       rating: 5,
       isVerified: false,
+      photo: mayaraSantosImg,
     },
     {
       id: 3,
@@ -1434,6 +1447,7 @@ function Testimonials() {
         "Meu MEI estava com várias pendências e eu não sabia por onde começar. Recebi toda a orientação necessária para organizar minha situação.",
       rating: 5,
       isVerified: false,
+      photo: joaoManoelImg,
     },
     {
       id: 4,
@@ -1444,6 +1458,7 @@ function Testimonials() {
         "Eu tinha muita dificuldade para emitir notas fiscais. Agora tenho o suporte que preciso e consigo cuidar do meu negócio com muito mais tranquilidade.",
       rating: 5,
       isVerified: false,
+      photo: rodrigoSilvaImg,
     },
     {
       id: 5,
@@ -1454,6 +1469,7 @@ function Testimonials() {
         "Sempre tive receio de fazer a declaração anual do MEI de forma errada. Com o acompanhamento contábil, tudo ficou mais simples e organizado.",
       rating: 5,
       isVerified: false,
+      photo: sheilaRodriguesImg,
     },
     {
       id: 6,
@@ -1464,6 +1480,7 @@ function Testimonials() {
         "O que mais gostei foi da facilidade no atendimento. Sempre que preciso de orientação, consigo esclarecer minhas dúvidas pelo WhatsApp de maneira prática.",
       rating: 5,
       isVerified: false,
+      photo: antonioFilhoImg,
     },
     {
       id: 7,
@@ -1474,6 +1491,7 @@ function Testimonials() {
         "Ter uma orientação profissional fez toda a diferença para o meu negócio. Hoje entendo melhor minhas obrigações e consigo tomar decisões com mais segurança.",
       rating: 5,
       isVerified: false,
+      photo: gustavoPedrosoImg,
     },
     {
       id: 8,
@@ -1484,6 +1502,7 @@ function Testimonials() {
         "Profissionalismo, atenção e muita clareza nas explicações. Recomendo para quem é MEI e procura um atendimento de confiança e qualidade.",
       rating: 5,
       isVerified: false,
+      photo: nathanOliveiraImg,
     },
   ];
 
@@ -1522,9 +1541,20 @@ function Testimonials() {
                 >
                   <div className="h-full rounded-[16px] bg-[#000000] border border-[#222222] p-6 sm:p-7 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1.5 hover:border-[#cbff1f]/40 hover:shadow-xl motion-reduce:transform-none motion-reduce:transition-none">
                     <div className="flex-1 flex flex-col">
-                      {/* Circular Initials Avatar Placeholder */}
-                      <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#181a1a] border border-[#cbff1f]/30 flex items-center justify-center text-[#cbff1f] font-bold text-sm sm:text-base tracking-wider select-none shadow-inner flex-shrink-0">
-                        {t.initials}
+                      {/* Circular Avatar */}
+                      <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#181a1a] border border-[#cbff1f]/30 flex items-center justify-center overflow-hidden flex-shrink-0 select-none shadow-inner">
+                        {t.photo ? (
+                          <img
+                            src={t.photo}
+                            alt={t.clientName}
+                            className="w-full h-full object-cover object-center"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <span className="text-[#cbff1f] font-bold text-sm sm:text-base tracking-wider">
+                            {t.initials}
+                          </span>
+                        )}
                       </div>
 
                       {/* Decorative Neon Lime-Green Quotation Mark */}
@@ -1777,7 +1807,7 @@ function FinalCTA() {
 
         <div className="mt-8 sm:mt-10 flex justify-center">
           <a
-            href={waLink}
+            href={OFFICIAL_WHATSAPP_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-3 rounded-full bg-black hover:bg-[#1a1d1e] text-white text-[15px] sm:text-base font-semibold px-7 sm:px-8 py-3.5 sm:py-4 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:ring-offset-[#CBFF1F] shadow-lg"
