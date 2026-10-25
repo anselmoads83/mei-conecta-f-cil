@@ -72,7 +72,7 @@ const WHATSAPP_MSG = encodeURIComponent(
 );
 const waLink = `https://wa.me/${WHATSAPP_NUMBER}?text=${WHATSAPP_MSG}`;
 const OFFICIAL_WHATSAPP_URL = "https://wa.me/5511915470723";
-const instagramLink = "https://www.instagram.com/anselmodiascontador/";
+const instagramLink = "https://www.instagram.com/anselmodiascontador";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -1845,7 +1845,8 @@ function FinalCTA() {
 function Footer() {
   const contactWhatsApp = "https://wa.me/5511915470723";
   const contactEmail = "gestao@anselmodiascontador.com.br";
-  const instagramUrl = "https://www.instagram.com/anselmodiascontador/";
+  const facebookUrl = "https://www.facebook.com/share/194VXXbUPe/";
+  const instagramUrl = "https://www.instagram.com/anselmodiascontador";
 
   return (
     <footer className="bg-[#000000] text-white pt-16 sm:pt-20 lg:pt-24 pb-8 sm:pb-10">
@@ -2016,8 +2017,9 @@ function Footer() {
 
               {/* Facebook */}
               <a
-                href="#"
-                onClick={(e) => e.preventDefault()}
+                href={facebookUrl}
+                target="_blank"
+                rel="noopener noreferrer"
                 aria-label="Facebook"
                 className="group block rounded-[14px] overflow-hidden transition-transform duration-200 ease-out hover:scale-[1.08] active:scale-95 will-change-transform"
               >
