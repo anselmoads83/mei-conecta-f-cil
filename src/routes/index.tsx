@@ -38,19 +38,19 @@ import {
   Minus,
   Clock,
 } from "lucide-react";
-import anselmoPortrait from "@/assets/images/anselmo-dias-retrato-profissional.png";
+import anselmoPortrait from "@/assets/images/anselmo-dias-retrato-profissional.webp";
 import anselmoPhotoHero from "@/assets/images/hero-anselmo.jpg";
-import logoImg from "@/assets/images/logo-anselmo-dias.png";
-import heroGeometricImg from "@/assets/images/hero-geometric.png";
+import logoImg from "@/assets/images/logo-anselmo-dias.webp";
+import heroGeometricImg from "@/assets/images/hero-geometric.webp";
 import brazilFlagImg from "@/assets/images/brazil-flag-waving.png";
-import marcosAlvesImg from "@/assets/images/testimonials/marcos-alves.png";
-import mayaraSantosImg from "@/assets/images/testimonials/mayara-santos.png";
-import joaoManoelImg from "@/assets/images/testimonials/joao-manoel.png";
-import rodrigoSilvaImg from "@/assets/images/testimonials/rodrigo-silva.png";
-import sheilaRodriguesImg from "@/assets/images/testimonials/sheila-rodrigues.png";
-import antonioFilhoImg from "@/assets/images/testimonials/antonio-filho.png";
-import gustavoPedrosoImg from "@/assets/images/testimonials/gustavo-pedroso.png";
-import nathanOliveiraImg from "@/assets/images/testimonials/nathan-oliveira.png";
+import marcosAlvesImg from "@/assets/images/testimonials/marcos-alves.webp";
+import mayaraSantosImg from "@/assets/images/testimonials/mayara-santos.webp";
+import joaoManoelImg from "@/assets/images/testimonials/joao-manoel.webp";
+import rodrigoSilvaImg from "@/assets/images/testimonials/rodrigo-silva.webp";
+import sheilaRodriguesImg from "@/assets/images/testimonials/sheila-rodrigues.webp";
+import antonioFilhoImg from "@/assets/images/testimonials/antonio-filho.webp";
+import gustavoPedrosoImg from "@/assets/images/testimonials/gustavo-pedroso.webp";
+import nathanOliveiraImg from "@/assets/images/testimonials/nathan-oliveira.webp";
 import {
   Accordion,
   AccordionContent,
