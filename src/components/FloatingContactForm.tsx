@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback, type FormEvent } from "react";
 import { User, Phone, Mail, MessageSquare, Send, X, AlertCircle, Info } from "lucide-react";
+import { submitContactLead } from "@/lib/api/leads.functions";
 
 interface FormData {
   name: string;
@@ -33,8 +34,8 @@ function validateBrazilianPhone(value: string): boolean {
   const ddd = parseInt(digits.slice(0, 2), 10);
   if (ddd < 11 || ddd > 99) return false;
   if (digits.length === 11 && digits[2] !== "9") return false;
-  // Reject repetitive sequences like 11111111111
-  if (/^(\d)\1+$/.test(digits)) return false;
+  // Reject repetitive sequences like 11111111111 or (11) 99999-9999
+  if (/^(\d)\1+$/.test(digits) || /^(\d)\1+$/.test(digits.slice(2))) return false;
   return true;
 }
 
@@ -52,10 +53,14 @@ export function FloatingContactForm() {
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [submissionNotice, setSubmissionNotice] = useState<string | null>(null);
+  const [submissionStatus, setSubmissionStatus] = useState<"idle" | "success" | "error">("idle");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const triggerButtonRef = useRef<HTMLButtonElement | null>(null);
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const nameInputRef = useRef<HTMLInputElement | null>(null);
+  const openedAtRef = useRef<number | null>(null);
+  const isSubmittingRef = useRef(false);
 
   // Focus management & Escape key handling
   useEffect(() => {
@@ -89,7 +94,9 @@ export function FloatingContactForm() {
   }, [isOpen]);
 
   const handleOpen = useCallback(() => {
+    openedAtRef.current = Date.now();
     setSubmissionNotice(null);
+    setSubmissionStatus("idle");
     setErrors({});
     setIsOpen(true);
   }, []);
@@ -117,9 +124,14 @@ export function FloatingContactForm() {
     }
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (isSubmitting || isSubmittingRef.current) {
+      return;
+    }
+
     setSubmissionNotice(null);
+    setSubmissionStatus("idle");
 
     const newErrors: FormErrors = {};
 
@@ -166,13 +178,60 @@ export function FloatingContactForm() {
       return;
     }
 
-    // Client-side validation passed!
-    // Note: Backend integration (Supabase/Brevo) is not yet authorized.
-    // We clearly communicate that direct online message sending is not yet available,
-    // preserving user inputs and without sending false success claims.
-    setSubmissionNotice(
-      "O envio online pelo formulário ainda não está ativado nesta fase. Para atendimento imediato, fale conosco diretamente pelo WhatsApp ao lado!"
-    );
+    isSubmittingRef.current = true;
+    setIsSubmitting(true);
+
+    const elapsedMs =
+      openedAtRef.current !== null ? Math.max(0, Date.now() - openedAtRef.current) : undefined;
+
+    try {
+      const result = await submitContactLead({
+        data: {
+          name: trimmedName,
+          phone: trimmedPhone,
+          email: trimmedEmail,
+          message: trimmedMessage,
+          elapsedMs,
+        },
+      });
+
+      if (result && result.ok === true && result.gravado === true && result.status === 201) {
+        setSubmissionStatus("success");
+        setSubmissionNotice(
+          "Recebemos seus dados e sua mensagem com segurança. Nossa equipe entrará em contato em breve!"
+        );
+        setFormData({
+          name: "",
+          phone: "",
+          email: "",
+          message: "",
+        });
+        setErrors({});
+        openedAtRef.current = Date.now();
+      } else {
+        if (result && !result.ok && result.fieldErrors) {
+          setErrors({
+            name: result.fieldErrors.name,
+            phone: result.fieldErrors.phone,
+            email: result.fieldErrors.email,
+            message: result.fieldErrors.message,
+          });
+        }
+        setSubmissionStatus("error");
+        setSubmissionNotice(
+          (result && !result.ok && result.error) ||
+            "Não foi possível concluir o envio pelo formulário agora. Para atendimento imediato, fale conosco diretamente pelo WhatsApp!"
+        );
+      }
+    } catch {
+      setSubmissionStatus("error");
+      setSubmissionNotice(
+        "Não foi possível concluir o envio pelo formulário agora. Para atendimento imediato, fale conosco diretamente pelo WhatsApp!"
+      );
+    } finally {
+      isSubmittingRef.current = false;
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -240,24 +299,46 @@ export function FloatingContactForm() {
                 </button>
               </div>
 
-              {/* Notice Banner (when validation passes but backend is not yet active) */}
+              {/* Notice Banner (real server confirmation or friendly error with WhatsApp fallback) */}
               {submissionNotice && (
                 <div
                   role="status"
-                  className="mt-4 p-3.5 rounded-2xl bg-amber-50 border border-amber-200/80 text-amber-900 text-xs sm:text-[12.5px] leading-relaxed flex items-start gap-2.5"
+                  className={`mt-4 p-3.5 rounded-2xl border text-xs sm:text-[12.5px] leading-relaxed flex items-start gap-2.5 ${
+                    submissionStatus === "success"
+                      ? "bg-emerald-50 border-emerald-200/80 text-emerald-900"
+                      : "bg-amber-50 border-amber-200/80 text-amber-900"
+                  }`}
                 >
-                  <Info className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5 stroke-[2.2]" />
+                  <Info
+                    className={`w-4 h-4 flex-shrink-0 mt-0.5 stroke-[2.2] ${
+                      submissionStatus === "success" ? "text-emerald-600" : "text-amber-600"
+                    }`}
+                  />
                   <div className="flex-1">
-                    <p className="font-semibold text-amber-950">Aviso informativo</p>
-                    <p className="mt-0.5 text-amber-900">{submissionNotice}</p>
-                    <a
-                      href="https://wa.me/5511915470723"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 font-bold text-emerald-700 underline mt-2 hover:text-emerald-800"
+                    <p
+                      className={`font-semibold ${
+                        submissionStatus === "success" ? "text-emerald-950" : "text-amber-950"
+                      }`}
                     >
-                      Falar agora pelo WhatsApp →
-                    </a>
+                      {submissionStatus === "success" ? "Mensagem enviada com sucesso!" : "Aviso informativo"}
+                    </p>
+                    <p
+                      className={`mt-0.5 ${
+                        submissionStatus === "success" ? "text-emerald-900" : "text-amber-900"
+                      }`}
+                    >
+                      {submissionNotice}
+                    </p>
+                    {submissionStatus !== "success" && (
+                      <a
+                        href="https://wa.me/5511915470723"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 font-bold text-emerald-700 underline mt-2 hover:text-emerald-800"
+                      >
+                        Falar agora pelo WhatsApp →
+                      </a>
+                    )}
                   </div>
                 </div>
               )}
@@ -428,10 +509,12 @@ export function FloatingContactForm() {
                 {/* Action Button: ENVIAR MENSAGEM */}
                 <button
                   type="submit"
-                  className="w-full mt-4 sm:mt-5 py-3.5 sm:py-4 px-6 rounded-2xl bg-[#CBFF1F] text-black font-extrabold text-xs sm:text-[13px] tracking-wider uppercase flex items-center justify-center gap-2.5 shadow-md hover:brightness-105 active:scale-[0.99] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black cursor-pointer"
+                  disabled={isSubmitting}
+                  aria-busy={isSubmitting}
+                  className="w-full mt-4 sm:mt-5 py-3.5 sm:py-4 px-6 rounded-2xl bg-[#CBFF1F] text-black font-extrabold text-xs sm:text-[13px] tracking-wider uppercase flex items-center justify-center gap-2.5 shadow-md hover:brightness-105 active:scale-[0.99] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   <Send className="w-4 h-4 text-black stroke-[2.4] flex-shrink-0 -rotate-12 translate-x-0.5" aria-hidden="true" />
-                  <span>ENVIAR MENSAGEM</span>
+                  <span>{isSubmitting ? "ENVIANDO..." : "ENVIAR MENSAGEM"}</span>
                 </button>
               </form>
             </div>

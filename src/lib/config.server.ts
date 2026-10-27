@@ -21,6 +21,7 @@ export function getServerConfig() {
     nodeEnv: process.env.NODE_ENV,
     leadIngestSecret: process.env.LEAD_INGEST_SECRET,
     supabaseUrl: process.env.SUPABASE_URL,
+    supabaseAnonKey: process.env.SUPABASE_ANON_KEY,
     supabaseEdgeFunctionUrl: process.env.SUPABASE_EDGE_FUNCTION_URL,
   };
 }

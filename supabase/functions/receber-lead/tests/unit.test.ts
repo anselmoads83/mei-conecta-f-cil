@@ -53,6 +53,29 @@ test("[unit] tipo_atividade: 150 aceito, 151 rejeitado, vazio rejeitado, null ac
   assert.equal(validateLead({ ...base, tipo_atividade: 123 }).ok, false);
 });
 
+test("[unit] mensagem: até 1000 caracteres preservada sem truncamento, 1001 rejeitada, vazia rejeitada, null e ausente aceitos como null", () => {
+  assert.equal(LIMITS.mensagem, 1000);
+  const msg1000 = "M".repeat(1000);
+  const r1000 = validateLead({ ...base, mensagem: msg1000 });
+  assert.equal(r1000.ok, true);
+  if (r1000.ok) {
+    assert.equal(r1000.lead.mensagem, msg1000);
+    assert.equal(r1000.lead.mensagem?.length, 1000);
+  }
+  assert.equal(validateLead({ ...base, mensagem: "M".repeat(1001) }).ok, false);
+  assert.equal(validateLead({ ...base, mensagem: "" }).ok, false);
+  assert.equal(validateLead({ ...base, mensagem: "   " }).ok, false);
+  assert.equal(validateLead({ ...base, mensagem: 123 }).ok, false);
+
+  const rNull = validateLead({ ...base, mensagem: null });
+  assert.equal(rNull.ok, true);
+  if (rNull.ok) assert.equal(rNull.lead.mensagem, null);
+
+  const rOmitted = validateLead(base);
+  assert.equal(rOmitted.ok, true);
+  if (rOmitted.ok) assert.equal(rOmitted.lead.mensagem, null);
+});
+
 test("[unit] limite de payload é 16.384 bytes", () => {
   assert.equal(MAX_PAYLOAD_BYTES, 16384);
 });

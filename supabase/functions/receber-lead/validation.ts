@@ -9,6 +9,7 @@ export const LIMITS = {
   whatsapp: 30,
   origem: 100,
   tipo_atividade: 150,
+  mensagem: 1000,
 } as const;
 
 export const ALLOWED_FIELDS: readonly string[] = [
@@ -17,6 +18,7 @@ export const ALLOWED_FIELDS: readonly string[] = [
   "whatsapp",
   "tipo_atividade",
   "origem",
+  "mensagem",
   "validar_apenas",
 ];
 
@@ -29,6 +31,7 @@ export interface Lead {
   whatsapp: string;
   tipo_atividade: string | null;
   origem: string;
+  mensagem: string | null;
 }
 
 export type ValidationResult =
@@ -119,6 +122,27 @@ export function validateLead(body: unknown): ValidationResult {
     errors.push("O campo 'tipo_atividade' deve ser texto ou null.");
   }
 
+  let mensagem: string | null = null;
+  let mensagemValid = false;
+  if (data.mensagem === undefined || data.mensagem === null) {
+    mensagem = null;
+    mensagemValid = true;
+  } else if (typeof data.mensagem === "string") {
+    const trimmed = data.mensagem.trim();
+    if (trimmed.length === 0) {
+      errors.push("O campo 'mensagem', quando informado, não pode estar vazio.");
+    } else if (trimmed.length > LIMITS.mensagem) {
+      errors.push(
+        `O campo 'mensagem' deve ter no máximo ${LIMITS.mensagem} caracteres.`,
+      );
+    } else {
+      mensagem = trimmed;
+      mensagemValid = true;
+    }
+  } else {
+    errors.push("O campo 'mensagem' deve ser texto ou null.");
+  }
+
   let validarApenas = false;
   if (data.validar_apenas !== undefined) {
     if (typeof data.validar_apenas !== "boolean") {
@@ -134,14 +158,15 @@ export function validateLead(body: unknown): ValidationResult {
     email === null ||
     whatsapp === null ||
     origem === null ||
-    !tipoAtividadeValid
+    !tipoAtividadeValid ||
+    !mensagemValid
   ) {
     return { ok: false, errors };
   }
 
   return {
     ok: true,
-    lead: { nome, email, whatsapp, tipo_atividade: tipoAtividade, origem },
+    lead: { nome, email, whatsapp, tipo_atividade: tipoAtividade, origem, mensagem },
     validarApenas,
   };
 }

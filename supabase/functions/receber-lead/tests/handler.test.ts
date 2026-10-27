@@ -126,6 +126,7 @@ test("[handler] segredo dedicado -> 201 { ok: true } e persistência normalizada
       whatsapp: "11915470723",
       tipo_atividade: null,
       origem: "site",
+      mensagem: null,
     },
   ]);
   assert.equal(logs.length, 0);
@@ -281,14 +282,14 @@ function fakeSql(opts: { fail?: boolean } = {}) {
   return { sql, calls };
 }
 
-test("[handler+repo] dry-run executa exatamente a consulta original, sem parâmetros e sem insert", async () => {
+test("[handler+repo] dry-run executa a consulta de estrutura incluindo mensagem, sem parâmetros e sem insert", async () => {
   const { sql, calls } = fakeSql();
   const { handler } = makeHandler(createPostgresRepository(() => sql));
   const res = await handler(post({ ...lead, validar_apenas: true }));
   assert.equal(res.status, 200);
   assert.equal(calls.length, 1);
   assert.deepEqual(calls[0].strings, [
-    "SELECT id, created_at, nome, email, whatsapp, tipo_atividade, origem FROM public.leads LIMIT 0",
+    "SELECT id, created_at, nome, email, whatsapp, tipo_atividade, origem, mensagem FROM public.leads LIMIT 0",
   ]);
   assert.deepEqual(calls[0].values, []);
 });
@@ -299,16 +300,17 @@ test("[handler+repo] dry-run com tabela/coluna inexistente -> 503", async () => 
   assert.equal((await handler(post({ ...lead, validar_apenas: true }))).status, 503);
 });
 
-test("[handler+repo] inserção parametrizada em public.leads", async () => {
+test("[handler+repo] inserção parametrizada em public.leads com mensagem de até 1000 caracteres", async () => {
   const { sql, calls } = fakeSql();
   const { handler } = makeHandler(createPostgresRepository(() => sql));
-  const res = await handler(post({ ...lead, tipo_atividade: "Comércio" }));
+  const msg1000 = "Preciso abrir meu MEI com segurança. ".padEnd(1000, "x");
+  const res = await handler(post({ ...lead, tipo_atividade: "Comércio", mensagem: msg1000 }));
   assert.equal(res.status, 201);
   assert.equal(calls.length, 1);
   const text = calls[0].strings.join("$?").replace(/\s+/g, " ").trim();
   assert.equal(
     text,
-    "INSERT INTO public.leads (nome, email, whatsapp, tipo_atividade, origem) VALUES ($?, $?, $?, $?, $?)",
+    "INSERT INTO public.leads (nome, email, whatsapp, tipo_atividade, origem, mensagem) VALUES ($?, $?, $?, $?, $?, $?)",
   );
   assert.deepEqual(calls[0].values, [
     "João Teste",
@@ -316,5 +318,6 @@ test("[handler+repo] inserção parametrizada em public.leads", async () => {
     "11915470723",
     "Comércio",
     "site",
+    msg1000,
   ]);
 });
