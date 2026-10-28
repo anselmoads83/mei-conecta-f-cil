@@ -17,7 +17,7 @@ export const FORM_LIMITS = {
 } as const;
 
 export const PROTECTION_DEFAULTS = {
-  timeoutMs: 8_000,
+  timeoutMs: 15_000,
   minFillTimeMs: 1_200,
   duplicatePayloadTtlMs: 5 * 60 * 1_000, // 5 minutos para payload idêntico
   contactWindowMs: 2 * 60 * 1_000, // 2 minutos por e-mail/WhatsApp
@@ -40,6 +40,31 @@ export interface LeadFormSubmissionInput {
   validar_apenas?: unknown;
   honeypot?: unknown;
   elapsedMs?: unknown;
+}
+
+export type PublicLeadFormSubmissionInput = Omit<LeadFormSubmissionInput, "validar_apenas">;
+
+export function sanitizePublicLeadInput(input: unknown): PublicLeadFormSubmissionInput {
+  if (typeof input !== "object" || input === null || Array.isArray(input)) {
+    return {
+      name: undefined,
+      phone: undefined,
+      email: undefined,
+      message: undefined,
+    };
+  }
+
+  const data = input as Record<string, unknown>;
+  return {
+    name: data.name,
+    phone: data.phone,
+    email: data.email,
+    message: data.message,
+    ...(data.tipo_atividade !== undefined ? { tipo_atividade: data.tipo_atividade } : {}),
+    ...(data.origem !== undefined ? { origem: data.origem } : {}),
+    ...(data.honeypot !== undefined ? { honeypot: data.honeypot } : {}),
+    ...(data.elapsedMs !== undefined ? { elapsedMs: data.elapsedMs } : {}),
+  };
 }
 
 export interface EdgeFunctionLeadPayload {
@@ -482,9 +507,10 @@ export function createLeadSubmissionService(deps: LeadSubmissionServiceDeps = {}
     const config = getConfig();
     const secret = config.leadIngestSecret?.trim();
     const anonKey = config.supabaseAnonKey?.trim();
-    const bearerToken = anonKey || secret;
+    const requiresAnonKey = Boolean(secret && secret.startsWith("sb_secret_"));
+    const bearerToken = requiresAnonKey ? anonKey : (anonKey || secret);
     const edgeUrl = resolveEdgeFunctionUrl(config);
-    if (!secret || !edgeUrl) {
+    if (!secret || !edgeUrl || !bearerToken) {
       log("lead_server_config_missing");
       return {
         ok: false,
@@ -515,6 +541,7 @@ export function createLeadSubmissionService(deps: LeadSubmissionServiceDeps = {}
           apikey: secret,
         },
         body: JSON.stringify(validation.payload),
+        redirect: "error",
         signal: controller.signal,
       });
 
@@ -554,7 +581,9 @@ export function createLeadSubmissionService(deps: LeadSubmissionServiceDeps = {}
         ok: false,
         status: 503,
         code: isAbort ? "upstream_timeout" : "upstream_unavailable",
-        error: "O servidor demorou para responder. Para atendimento imediato, fale conosco pelo WhatsApp!",
+        error: isAbort
+          ? "O servidor demorou para responder. Para atendimento imediato, fale conosco pelo WhatsApp!"
+          : "Serviço temporariamente indisponível. Por favor, fale conosco pelo WhatsApp!",
       };
     } finally {
       clearTimeout(timer);

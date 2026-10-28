@@ -12,6 +12,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   createLeadSubmissionService,
+  sanitizePublicLeadInput,
   validateAndMapFormInput,
   PROTECTION_DEFAULTS,
 } from "../../../../src/lib/leads.server.ts";
@@ -40,7 +41,7 @@ function createConnectedSetup(opts: { dbFail?: boolean; secretMismatch?: boolean
   const capturedRequests: Request[] = [];
   const fetchImpl: typeof fetch = async (input, init) => {
     const req = new Request(String(input), init);
-    capturedRequests.push(req);
+    capturedRequests.push(req.clone());
     return await edgeHandler(req);
   };
 
@@ -326,4 +327,163 @@ test("[headers] suporta tanto Verify JWT desativado (apenas LEAD_INGEST_SECRET) 
   assert.equal(capturedHeaders[0].authorization, `Bearer ${ANON_JWT}`);
   assert.equal(capturedHeaders[0].apikey, SECRET);
   assert.equal(sqlCalls.length, 1);
+});
+
+test("[etapa 4.9] timeout padrão é de 15.000 ms (15 segundos) acima do connect_timeout do PostgreSQL", () => {
+  assert.equal(PROTECTION_DEFAULTS.timeoutMs, 15_000);
+});
+
+test("[etapa 4.9] Secret Key moderna (sb_secret_) exige SUPABASE_ANON_KEY e retorna server_misconfigured se ausente", async () => {
+  const MODERN_SECRET = "sb_secret_test_key_only_for_local_unit_test";
+  const ANON_JWT = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.anon-test-payload.signature";
+  let networkCalls = 0;
+
+  // 1. Sem SUPABASE_ANON_KEY -> bloqueia antes da rede com server_misconfigured
+  const serviceWithoutAnon = createLeadSubmissionService({
+    getConfig: () => ({
+      leadIngestSecret: MODERN_SECRET,
+      supabaseAnonKey: "",
+      supabaseEdgeFunctionUrl: EDGE_URL,
+    }),
+    fetchImpl: async () => {
+      networkCalls++;
+      return new Response(JSON.stringify({ ok: true }), { status: 201 });
+    },
+  });
+
+  const rMissingAnon = await serviceWithoutAnon(validFormInput);
+  assert.equal(rMissingAnon.ok, false);
+  if (!rMissingAnon.ok) {
+    assert.equal(rMissingAnon.status, 503);
+    assert.equal(rMissingAnon.code, "server_misconfigured");
+    assert.ok(!rMissingAnon.error.includes(MODERN_SECRET));
+  }
+  assert.equal(networkCalls, 0);
+
+  // 2. Com SUPABASE_ANON_KEY presente -> envia Authorization: Bearer <ANON_JWT> e apikey: <MODERN_SECRET> sem Origin
+  const capturedRequests: Request[] = [];
+  const serviceWithAnon = createLeadSubmissionService({
+    getConfig: () => ({
+      leadIngestSecret: MODERN_SECRET,
+      supabaseAnonKey: ANON_JWT,
+      supabaseEdgeFunctionUrl: EDGE_URL,
+    }),
+    fetchImpl: async (input, init) => {
+      const req = new Request(String(input), init);
+      capturedRequests.push(req);
+      return new Response(JSON.stringify({ ok: true }), {
+        status: 201,
+        headers: { "Content-Type": "application/json" },
+      });
+    },
+  });
+
+  const rSuccess = await serviceWithAnon(validFormInput);
+  assert.deepEqual(rSuccess, { ok: true, status: 201, gravado: true });
+  assert.equal(capturedRequests.length, 1);
+  assert.equal(capturedRequests[0].headers.get("authorization"), `Bearer ${ANON_JWT}`);
+  assert.equal(capturedRequests[0].headers.get("apikey"), MODERN_SECRET);
+  assert.equal(capturedRequests[0].headers.get("content-type"), "application/json; charset=utf-8");
+  assert.equal(capturedRequests[0].headers.get("origin"), null);
+});
+
+test("[etapa 4.9] rota pública (sanitizePublicLeadInput) descarta validar_apenas e nunca encaminha validar_apenas: true à Edge Function", async () => {
+  const { submitLead, capturedRequests, sqlCalls } = createConnectedSetup();
+
+  const craftedClientPayload = {
+    ...validFormInput,
+    validar_apenas: true,
+  };
+
+  const sanitized = sanitizePublicLeadInput(craftedClientPayload);
+  assert.equal("validar_apenas" in sanitized, false);
+
+  const res = await submitLead(sanitized);
+  assert.deepEqual(res, { ok: true, status: 201, gravado: true });
+  assert.equal(capturedRequests.length, 1);
+
+  const sentJson = (await capturedRequests[0].clone().json()) as Record<string, unknown>;
+  assert.equal("validar_apenas" in sentJson, false);
+  assert.equal(sqlCalls.length, 1);
+  assert.ok(sqlCalls[0].query.startsWith("INSERT INTO public.leads"));
+});
+
+test("[etapa 4.9] HTTP 200 sem validar_apenas não é aceito como envio real gravado", async () => {
+  const service = createLeadSubmissionService({
+    getConfig: () => ({
+      leadIngestSecret: SECRET,
+      supabaseEdgeFunctionUrl: EDGE_URL,
+    }),
+    fetchImpl: async () =>
+      new Response(JSON.stringify({ ok: true, validado: true, gravado: false }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+  });
+
+  const res = await service(validFormInput);
+  assert.equal(res.ok, false);
+  if (!res.ok) {
+    assert.equal(res.status, 503);
+    assert.equal(res.code, "upstream_unavailable");
+  }
+});
+
+test("[etapa 5.1b] chamada utiliza redirect: 'error' e bloqueia redirecionamentos com falha segura sem reenviar segredos", async () => {
+  const capturedRequests: Request[] = [];
+  let simulatedRedirectAttempts = 0;
+
+  // 1. Confirma que a propriedade redirect: 'error' é enviada com os cabeçalhos corretos
+  const service = createLeadSubmissionService({
+    getConfig: () => ({
+      leadIngestSecret: SECRET,
+      supabaseEdgeFunctionUrl: EDGE_URL,
+    }),
+    fetchImpl: async (input, init) => {
+      const req = new Request(String(input), init);
+      capturedRequests.push(req);
+      assert.equal(req.redirect, "error");
+      return new Response(JSON.stringify({ ok: true }), {
+        status: 201,
+        headers: { "Content-Type": "application/json" },
+      });
+    },
+  });
+
+  const res = await service(validFormInput);
+  assert.deepEqual(res, { ok: true, status: 201, gravado: true });
+  assert.equal(capturedRequests.length, 1);
+  assert.equal(capturedRequests[0].redirect, "error");
+  assert.equal(capturedRequests[0].headers.get("authorization"), `Bearer ${SECRET}`);
+  assert.equal(capturedRequests[0].headers.get("apikey"), SECRET);
+
+  // 2. Simula resposta de redirecionamento HTTP (301/302) onde fetch rejeita devido a redirect: 'error'
+  const redirectRejectService = createLeadSubmissionService({
+    getConfig: () => ({
+      leadIngestSecret: SECRET,
+      supabaseEdgeFunctionUrl: EDGE_URL,
+    }),
+    fetchImpl: async (_input, init) => {
+      simulatedRedirectAttempts++;
+      if (init?.redirect === "error") {
+        // Comportamento especificado pelo standard Fetch quando redirect: 'error' encontra status 3xx
+        const redirectError = new TypeError("Failed to fetch: redirect mode is set to error");
+        return Promise.reject(redirectError);
+      }
+      return new Response(null, { status: 302, headers: { Location: "https://outro-site.com/intercept" } });
+    },
+  });
+
+  const resRedirect = await redirectRejectService(validFormInput);
+  assert.equal(resRedirect.ok, false);
+  if (!resRedirect.ok) {
+    assert.equal(resRedirect.status, 503);
+    assert.equal(resRedirect.code, "upstream_unavailable");
+    assert.equal(
+      resRedirect.error,
+      "Serviço temporariamente indisponível. Por favor, fale conosco pelo WhatsApp!",
+    );
+  }
+  // Confirma que não houve tentativas de seguir o redirecionamento
+  assert.equal(simulatedRedirectAttempts, 1);
 });
