@@ -14,7 +14,7 @@ import {
 // qualquer tentativa externa de controlar `validar_apenas`.
 
 export const submitContactLead = createServerFn({ method: "POST" })
-  .inputValidator((data: PublicLeadFormSubmissionInput) => sanitizePublicLeadInput(data))
+  .validator((data: PublicLeadFormSubmissionInput) => sanitizePublicLeadInput(data))
   .handler(async ({ data }): Promise<LeadSubmissionResult> => {
     let headers: Headers | Record<string, string | undefined> | undefined;
     try {
