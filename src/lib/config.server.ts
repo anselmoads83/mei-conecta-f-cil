@@ -23,5 +23,6 @@ export function getServerConfig() {
     supabaseUrl: process.env.SUPABASE_URL,
     supabaseAnonKey: process.env.SUPABASE_ANON_KEY,
     supabaseEdgeFunctionUrl: process.env.SUPABASE_EDGE_FUNCTION_URL,
+    allowedOrigins: process.env.ALLOWED_ORIGINS,
   };
 }

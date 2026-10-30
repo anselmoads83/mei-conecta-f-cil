@@ -113,6 +113,7 @@ export interface ServerConfigProvider {
   supabaseUrl?: string;
   supabaseAnonKey?: string;
   supabaseEdgeFunctionUrl?: string;
+  allowedOrigins?: string;
 }
 
 export interface LeadSubmissionServiceDeps {
@@ -369,21 +370,149 @@ export function createLeadSubmissionService(deps: LeadSubmissionServiceDeps = {}
     return sha256Hex(`${ipPart}|${uaPart}`);
   }
 
-  function isCrossSiteRequest(meta?: RequestMetadata): boolean {
-    const secFetchSite = getHeader(meta?.headers, "sec-fetch-site")?.trim().toLowerCase();
-    if (secFetchSite && secFetchSite === "cross-site") {
-      return true;
+  // Domínios legítimos autorizados da aplicação (produção oficial, CDN e homologação)
+  const DEFAULT_ALLOWED_ORIGIN_HOSTS = [
+    "www.anselmodiascontador.com.br",
+    "anselmodiascontador.com.br",
+    "anselmodiascontador.b-cdn.net",
+    "site-anselmo-dias-23f525-meu-projeto-a191.guaracloud.com",
+  ] as const;
+
+  const LOCAL_DEV_ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+  ] as const;
+
+  function getAllowedOriginsSet(customAllowedOrigins?: string): Set<string> {
+    const allowed = new Set<string>();
+
+    // Domínios de produção/remotos: estritamente HTTPS
+    for (const host of DEFAULT_ALLOWED_ORIGIN_HOSTS) {
+      allowed.add(`https://${host}`);
     }
-    const origin = getHeader(meta?.headers, "origin")?.trim();
-    const host = getHeader(meta?.headers, "host")?.trim();
-    if (origin && host) {
+
+    // Domínios locais de desenvolvimento: HTTP
+    for (const host of LOCAL_DEV_ALLOWED_HOSTS) {
+      allowed.add(`http://${host}`);
+      allowed.add(`http://${host}:3000`);
+      allowed.add(`http://${host}:5173`);
+    }
+
+    // Origens customizadas passadas via variável de ambiente (ALLOWED_ORIGINS)
+    if (customAllowedOrigins) {
+      for (const item of customAllowedOrigins.split(",")) {
+        const trimmed = item.trim();
+        if (!trimmed) continue;
+        try {
+          const url = new URL(trimmed.includes("://") ? trimmed : `https://${trimmed}`);
+          if (url.origin && url.origin !== "null") {
+            allowed.add(url.origin.toLowerCase());
+          }
+        } catch {
+          // ignora formato inválido
+        }
+      }
+    }
+
+    return allowed;
+  }
+
+  function isCrossSiteRequest(meta?: RequestMetadata, allowedOriginsEnv?: string): boolean {
+    // 1. Se meta ou meta.headers não foi fornecido (chamada programática interna sem contexto HTTP),
+    // não há cabeçalhos HTTP de rede para analisar.
+    if (!meta?.headers) {
+      return false;
+    }
+
+    // 2. Cabeçalho Sec-Fetch-Site: proteção nativa dos navegadores modernos contra CSRF
+    const secFetchSite = getHeader(meta.headers, "sec-fetch-site")?.trim().toLowerCase();
+    if (secFetchSite && secFetchSite === "cross-site") {
+      return true; // Se o navegador sinalizou cross-site, rejeita sumariamente
+    }
+
+    const rawOrigin = getHeader(meta.headers, "origin")?.trim();
+    const rawReferer = getHeader(meta.headers, "referer")?.trim();
+    const rawHost = getHeader(meta.headers, "host")?.trim();
+    const rawUserAgent = getHeader(meta.headers, "user-agent")?.trim();
+    const allowedOrigins = getAllowedOriginsSet(allowedOriginsEnv);
+
+    // 3. Validação prioritária por cabeçalho Origin (obrigatório em POST via fetch/AJAX em navegadores)
+    if (rawOrigin) {
+      if (rawOrigin === "null") return true;
+
+      let originUrl: URL;
       try {
-        const originHost = new URL(origin).host.toLowerCase();
-        if (originHost !== host.toLowerCase()) return true;
+        originUrl = new URL(rawOrigin);
       } catch {
         return true;
       }
+
+      const origin = originUrl.origin.toLowerCase();
+      const hostname = originUrl.hostname.toLowerCase();
+
+      // Protocolo: apenas HTTPS é aceito para produção/remotos (HTTP restrito a localhost/127.0.0.1)
+      if (originUrl.protocol !== "https:") {
+        const isLocalHost = hostname === "localhost" || hostname === "127.0.0.1";
+        if (!isLocalHost || originUrl.protocol !== "http:") {
+          return true;
+        }
+      }
+
+      // Regra de segurança fundamental:
+      // O Origin DEVE obrigatoriamente constar na lista estrita de origens autorizadas.
+      // NUNCA confiamos exclusivamente em X-Forwarded-Host ou Host do cliente para autorizar domínios arbitrários.
+      if (allowedOrigins.has(origin)) {
+        return false;
+      }
+
+      const normalizedHostOrigin = `${originUrl.protocol}//${originUrl.host.toLowerCase()}`;
+      if (allowedOrigins.has(normalizedHostOrigin)) {
+        return false;
+      }
+
+      return true;
     }
+
+    // 4. Validação alternativa por Referer (quando Origin estiver ausente)
+    if (rawReferer) {
+      let refererUrl: URL;
+      try {
+        refererUrl = new URL(rawReferer);
+      } catch {
+        return true;
+      }
+
+      const refererOrigin = refererUrl.origin.toLowerCase();
+      const refererHostname = refererUrl.hostname.toLowerCase();
+
+      if (refererUrl.protocol !== "https:") {
+        const isLocalHost = refererHostname === "localhost" || refererHostname === "127.0.0.1";
+        if (!isLocalHost || refererUrl.protocol !== "http:") {
+          return true;
+        }
+      }
+
+      if (allowedOrigins.has(refererOrigin)) {
+        return false;
+      }
+
+      const normalizedRefererOrigin = `${refererUrl.protocol}//${refererUrl.host.toLowerCase()}`;
+      if (allowedOrigins.has(normalizedRefererOrigin)) {
+        return false;
+      }
+
+      return true;
+    }
+
+    // 5. Política para requisições externas sem identificação de origem:
+    // Se a requisição apresenta cabeçalhos de rede HTTP (como Host, User-Agent ou Sec-Fetch-Site),
+    // mas NÃO apresenta nem Origin nem Referer:
+    // Esta ausência total de identificação de origem em um endpoint POST de formulário é considerada suspeita/não autorizada
+    // (previne bypass por bots, scripts curl sem Origin e ataques CSRF com <meta name="referrer" content="no-referrer">).
+    if (rawHost || rawUserAgent || secFetchSite) {
+      return true; // Bloqueado: requisição HTTP externa sem comprovação de origem legítima
+    }
+
     return false;
   }
 
@@ -395,7 +524,8 @@ export function createLeadSubmissionService(deps: LeadSubmissionServiceDeps = {}
     pruneExpired(currentTime);
 
     // 1. Verificação de origem / Sec-Fetch-Site quando cabeçalhos da requisição estão presentes
-    if (isCrossSiteRequest(meta)) {
+    const config = getConfig();
+    if (isCrossSiteRequest(meta, config.allowedOrigins)) {
       log("lead_rejected_cross_site");
       return {
         ok: false,
@@ -504,7 +634,6 @@ export function createLeadSubmissionService(deps: LeadSubmissionServiceDeps = {}
     }
 
     // 9. Verificação das credenciais de servidor
-    const config = getConfig();
     const secret = config.leadIngestSecret?.trim();
     const anonKey = config.supabaseAnonKey?.trim();
     const requiresAnonKey = Boolean(secret && secret.startsWith("sb_secret_"));

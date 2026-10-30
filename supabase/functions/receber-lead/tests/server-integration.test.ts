@@ -487,3 +487,345 @@ test("[etapa 5.1b] chamada utiliza redirect: 'error' e bloqueia redirecionamento
   // Confirma que não houve tentativas de seguir o redirecionamento
   assert.equal(simulatedRedirectAttempts, 1);
 });
+
+test("[origem / proxy] aceita domínios autorizados (Bunny CDN, oficial www/apex, Guará Cloud) e rejeita ataques cross-site e spoofing", async () => {
+  const { submitLead, advanceTime } = createConnectedSetup();
+
+  // 1. Bunny CDN temporário com X-Forwarded-Host e Host da Guará Cloud -> 201 Aceito
+  const rBunnyXf = await submitLead(
+    { ...validFormInput, email: "teste.bunny1@empresa.com", phone: "(11) 98330-2001" },
+    {
+      headers: {
+        origin: "https://anselmodiascontador.b-cdn.net",
+        host: "site-anselmo-dias-23f525-meu-projeto-a191.guaracloud.com",
+        "x-forwarded-host": "anselmodiascontador.b-cdn.net",
+        "sec-fetch-site": "same-origin",
+      },
+    },
+  );
+  assert.equal(rBunnyXf.ok, true);
+
+  // 2. Bunny CDN sem X-Forwarded-Host (apenas Host interno da Guará Cloud) -> 201 Aceito pela lista estrita
+  const rBunnyDirect = await submitLead(
+    { ...validFormInput, email: "teste.bunny2@empresa.com", phone: "(11) 98330-2002" },
+    {
+      headers: {
+        origin: "https://anselmodiascontador.b-cdn.net",
+        host: "site-anselmo-dias-23f525-meu-projeto-a191.guaracloud.com",
+        "sec-fetch-site": "same-origin",
+      },
+    },
+  );
+  assert.equal(rBunnyDirect.ok, true);
+
+  // 3. Domínio oficial de produção (www.anselmodiascontador.com.br) via proxy -> 201 Aceito
+  const rOficialWww = await submitLead(
+    { ...validFormInput, email: "teste.oficial1@empresa.com", phone: "(11) 98330-2003" },
+    {
+      headers: {
+        origin: "https://www.anselmodiascontador.com.br",
+        host: "site-anselmo-dias-23f525-meu-projeto-a191.guaracloud.com",
+        "x-forwarded-host": "www.anselmodiascontador.com.br:443",
+      },
+    },
+  );
+  assert.equal(rOficialWww.ok, true);
+
+  // 4. Domínio apex de produção (anselmodiascontador.com.br) -> 201 Aceito
+  const rOficialApex = await submitLead(
+    { ...validFormInput, email: "teste.oficial2@empresa.com", phone: "(11) 98330-2004" },
+    {
+      headers: {
+        origin: "https://anselmodiascontador.com.br",
+        host: "site-anselmo-dias-23f525-meu-projeto-a191.guaracloud.com",
+      },
+    },
+  );
+  assert.equal(rOficialApex.ok, true);
+
+  // 5. Tentativa de spoofing com subdomínio malicioso (anselmodiascontador.b-cdn.net.malicious.com) -> 403 Bloqueado
+  const rSpoof = await submitLead(
+    { ...validFormInput, email: "teste.spoof@empresa.com", phone: "(11) 98330-2005" },
+    {
+      headers: {
+        origin: "https://anselmodiascontador.b-cdn.net.malicious.com",
+        host: "site-anselmo-dias-23f525-meu-projeto-a191.guaracloud.com",
+      },
+    },
+  );
+  assert.equal(rSpoof.ok, false);
+  if (!rSpoof.ok) {
+    assert.equal(rSpoof.status, 403);
+    assert.equal(rSpoof.code, "forbidden_origin");
+    assert.equal(rSpoof.error, "Origem da requisição não autorizada.");
+  }
+
+  // 6. Requisição com Sec-Fetch-Site: cross-site -> 403 Bloqueado
+  const rCross = await submitLead(
+    { ...validFormInput, email: "teste.cross@empresa.com", phone: "(11) 98330-2006" },
+    {
+      headers: {
+        origin: "https://www.anselmodiascontador.com.br",
+        "sec-fetch-site": "cross-site",
+      },
+    },
+  );
+  assert.equal(rCross.ok, false);
+  if (!rCross.ok) {
+    assert.equal(rCross.status, 403);
+    assert.equal(rCross.code, "forbidden_origin");
+  }
+
+  // 7. Proxy com múltiplos hops em X-Forwarded-Host (client-host, proxy2) -> 201 Aceito
+  const rMultiHop = await submitLead(
+    { ...validFormInput, email: "teste.hop@empresa.com", phone: "(11) 98330-2007" },
+    {
+      headers: {
+        origin: "https://anselmodiascontador.b-cdn.net",
+        host: "10.0.0.1",
+        "x-forwarded-host": "anselmodiascontador.b-cdn.net, proxy-interno.guara",
+      },
+    },
+  );
+  assert.equal(rMultiHop.ok, true);
+
+  // 8. Origem customizada configurada via allowedOrigins -> 201 Aceito
+  const customService = createLeadSubmissionService({
+    getConfig: () => ({
+      leadIngestSecret: SECRET,
+      supabaseEdgeFunctionUrl: EDGE_URL,
+      allowedOrigins: "https://homologacao.parceiro.com.br",
+    }),
+    fetchImpl: async () => new Response(JSON.stringify({ ok: true }), { status: 201 }),
+  });
+  const rCustom = await customService(
+    { ...validFormInput, email: "teste.custom@empresa.com", phone: "(11) 98330-2008" },
+    {
+      headers: {
+        origin: "https://homologacao.parceiro.com.br",
+        host: "site-anselmo-dias-23f525-meu-projeto-a191.guaracloud.com",
+      },
+    },
+  );
+  assert.equal(rCustom.ok, true);
+
+  advanceTime(PROTECTION_DEFAULTS.clientWindowMs + 1000);
+  // 9. Referer fallback quando Origin está ausente -> 201 Aceito
+  const rReferer = await submitLead(
+    { ...validFormInput, email: "teste.ref@empresa.com", phone: "(11) 98330-2009" },
+    {
+      headers: {
+        referer: "https://www.anselmodiascontador.com.br/contato",
+        host: "site-anselmo-dias-23f525-meu-projeto-a191.guaracloud.com",
+      },
+    },
+  );
+  assert.equal(rReferer.ok, true);
+});
+
+test("[auditoria de segurança] validação de origem é imune a falsificação de X-Forwarded-Host, esquemas inseguros, Origin null e conflitos", async () => {
+  const { submitLead, advanceTime } = createConnectedSetup();
+
+  // 1. Atacante forja Origin malicioso E X-Forwarded-Host idêntico -> 403 Bloqueado (X-Forwarded-Host não autoriza)
+  const rSpoofedXf = await submitLead(
+    { ...validFormInput, email: "teste.spoofedxf@empresa.com", phone: "(11) 98330-2101" },
+    {
+      headers: {
+        origin: "https://site-malicioso.com",
+        "x-forwarded-host": "site-malicioso.com",
+        host: "site-anselmo-dias-23f525-meu-projeto-a191.guaracloud.com",
+      },
+    },
+  );
+  assert.equal(rSpoofedXf.ok, false);
+  if (!rSpoofedXf.ok) {
+    assert.equal(rSpoofedXf.status, 403);
+    assert.equal(rSpoofedXf.code, "forbidden_origin");
+  }
+
+  // 2. Esquema HTTP inseguro para domínio oficial em produção -> 403 Bloqueado (apenas HTTPS é aceito)
+  const rInsecureHttp = await submitLead(
+    { ...validFormInput, email: "teste.insecure@empresa.com", phone: "(11) 98330-2102" },
+    {
+      headers: {
+        origin: "http://www.anselmodiascontador.com.br",
+        host: "site-anselmo-dias-23f525-meu-projeto-a191.guaracloud.com",
+      },
+    },
+  );
+  assert.equal(rInsecureHttp.ok, false);
+  if (!rInsecureHttp.ok) {
+    assert.equal(rInsecureHttp.status, 403);
+    assert.equal(rInsecureHttp.code, "forbidden_origin");
+  }
+
+  // 3. Origin "null" (comum em sandboxed iframes e data: URIs) -> 403 Bloqueado
+  const rNullOrigin = await submitLead(
+    { ...validFormInput, email: "teste.null@empresa.com", phone: "(11) 98330-2103" },
+    {
+      headers: {
+        origin: "null",
+        host: "site-anselmo-dias-23f525-meu-projeto-a191.guaracloud.com",
+      },
+    },
+  );
+  assert.equal(rNullOrigin.ok, false);
+  if (!rNullOrigin.ok) {
+    assert.equal(rNullOrigin.status, 403);
+    assert.equal(rNullOrigin.code, "forbidden_origin");
+  }
+
+  // 4. Porta não autorizada em produção (ex: :8443) -> 403 Bloqueado
+  const rBadPort = await submitLead(
+    { ...validFormInput, email: "teste.badport@empresa.com", phone: "(11) 98330-2104" },
+    {
+      headers: {
+        origin: "https://www.anselmodiascontador.com.br:8443",
+        host: "site-anselmo-dias-23f525-meu-projeto-a191.guaracloud.com",
+      },
+    },
+  );
+  assert.equal(rBadPort.ok, false);
+  if (!rBadPort.ok) {
+    assert.equal(rBadPort.status, 403);
+    assert.equal(rBadPort.code, "forbidden_origin");
+  }
+
+  // 5. Porta padrão :443 explícita no Origin -> 201 Aceito (normalizada para HTTPS padrão)
+  const rStandardPort = await submitLead(
+    { ...validFormInput, email: "teste.stdport@empresa.com", phone: "(11) 98330-2105" },
+    {
+      headers: {
+        origin: "https://www.anselmodiascontador.com.br:443",
+        host: "site-anselmo-dias-23f525-meu-projeto-a191.guaracloud.com",
+      },
+    },
+  );
+  assert.equal(rStandardPort.ok, true);
+
+  // 6. Cabeçalhos conflitantes: Origin legítimo mas Sec-Fetch-Site: cross-site -> 403 Bloqueado
+  const rConflict = await submitLead(
+    { ...validFormInput, email: "teste.conflict@empresa.com", phone: "(11) 98330-2106" },
+    {
+      headers: {
+        origin: "https://www.anselmodiascontador.com.br",
+        "sec-fetch-site": "cross-site",
+      },
+    },
+  );
+  assert.equal(rConflict.ok, false);
+  if (!rConflict.ok) {
+    assert.equal(rConflict.status, 403);
+    assert.equal(rConflict.code, "forbidden_origin");
+  }
+
+  // 7. Ausência total de Origin e Referer, mas com Sec-Fetch-Site: cross-site -> 403 Bloqueado
+  const rNoOriginCrossSite = await submitLead(
+    { ...validFormInput, email: "teste.noorigincross@empresa.com", phone: "(11) 98330-2107" },
+    {
+      headers: {
+        "sec-fetch-site": "cross-site",
+      },
+    },
+  );
+  assert.equal(rNoOriginCrossSite.ok, false);
+  if (!rNoOriginCrossSite.ok) {
+    assert.equal(rNoOriginCrossSite.status, 403);
+    assert.equal(rNoOriginCrossSite.code, "forbidden_origin");
+  }
+
+  // 8. Ambiente local (localhost / 127.0.0.1 com HTTP) -> 201 Aceito
+  advanceTime(PROTECTION_DEFAULTS.clientWindowMs + 1000);
+  const rLocalDev = await submitLead(
+    { ...validFormInput, email: "teste.localdev@empresa.com", phone: "(11) 98330-2108" },
+    {
+      headers: {
+        origin: "http://localhost:3000",
+        host: "localhost:3000",
+      },
+    },
+  );
+  assert.equal(rLocalDev.ok, true);
+});
+
+test("[política zero-trust] requisições externas sem Origin e Referer são rejeitadas para impedir bypass por bots e CSRF no-referrer", async () => {
+  const { submitLead } = createConnectedSetup();
+
+  // 1. Requisição externa com Host oficial, mas sem Origin, sem Referer e sem Sec-Fetch-Site -> 403 Bloqueado
+  const rNoOriginOficial = await submitLead(
+    { ...validFormInput, email: "teste.noorigin1@empresa.com", phone: "(11) 98330-2201" },
+    {
+      headers: {
+        host: "www.anselmodiascontador.com.br",
+      },
+    },
+  );
+  assert.equal(rNoOriginOficial.ok, false);
+  if (!rNoOriginOficial.ok) {
+    assert.equal(rNoOriginOficial.status, 403);
+    assert.equal(rNoOriginOficial.code, "forbidden_origin");
+    assert.equal(rNoOriginOficial.error, "Origem da requisição não autorizada.");
+  }
+
+  // 2. Requisição externa com Host da CDN (Bunny), mas sem Origin e sem Referer -> 403 Bloqueado
+  const rNoOriginCdn = await submitLead(
+    { ...validFormInput, email: "teste.noorigin2@empresa.com", phone: "(11) 98330-2202" },
+    {
+      headers: {
+        host: "anselmodiascontador.b-cdn.net",
+      },
+    },
+  );
+  assert.equal(rNoOriginCdn.ok, false);
+  if (!rNoOriginCdn.ok) {
+    assert.equal(rNoOriginCdn.status, 403);
+    assert.equal(rNoOriginCdn.code, "forbidden_origin");
+  }
+
+  // 3. Script externo/bot enviando User-Agent e Host sem Origin -> 403 Bloqueado
+  const rBotScript = await submitLead(
+    { ...validFormInput, email: "teste.bot@empresa.com", phone: "(11) 98330-2203" },
+    {
+      headers: {
+        host: "site-anselmo-dias-23f525-meu-projeto-a191.guaracloud.com",
+        "user-agent": "python-requests/2.31.0",
+      },
+    },
+  );
+  assert.equal(rBotScript.ok, false);
+  if (!rBotScript.ok) {
+    assert.equal(rBotScript.status, 403);
+    assert.equal(rBotScript.code, "forbidden_origin");
+  }
+
+  // 4. Tentativa com Sec-Fetch-Site: same-origin forjado, porém sem Origin nem Referer -> 403 Bloqueado
+  const rSameOriginNoHeaders = await submitLead(
+    { ...validFormInput, email: "teste.sameoriginnohead@empresa.com", phone: "(11) 98330-2204" },
+    {
+      headers: {
+        host: "www.anselmodiascontador.com.br",
+        "sec-fetch-site": "same-origin",
+      },
+    },
+  );
+  assert.equal(rSameOriginNoHeaders.ok, false);
+  if (!rSameOriginNoHeaders.ok) {
+    assert.equal(rSameOriginNoHeaders.status, 403);
+    assert.equal(rSameOriginNoHeaders.code, "forbidden_origin");
+  }
+
+  // 5. Chamada de navegador legítimo fornecendo Origin oficial -> 201 Aceito
+  const rLegitimateBrowser = await submitLead(
+    { ...validFormInput, email: "teste.legitimo@empresa.com", phone: "(11) 98330-2205" },
+    {
+      headers: {
+        host: "site-anselmo-dias-23f525-meu-projeto-a191.guaracloud.com",
+        origin: "https://www.anselmodiascontador.com.br",
+        referer: "https://www.anselmodiascontador.com.br/",
+        "sec-fetch-site": "same-origin",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+      },
+    },
+  );
+  assert.equal(rLegitimateBrowser.ok, true);
+});
