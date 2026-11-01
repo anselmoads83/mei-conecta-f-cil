@@ -91,7 +91,7 @@ export const Route = createFileRoute("/")({
       },
       { property: "og:image", content: anselmoPhotoHero },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "/" },
+      { property: "og:url", content: "https://www.anselmodiascontador.com.br/" },
       { property: "og:locale", content: "pt_BR" },
       { property: "og:site_name", content: "Anselmo Dias Contador" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -99,7 +99,7 @@ export const Route = createFileRoute("/")({
       { name: "twitter:description", content: "Regularize seu MEI com um contador especialista: DAS atrasado, DASN-SIMEI, dívidas, NF-e, abertura e baixa." },
       { name: "twitter:image", content: anselmoPhotoHero },
     ],
-    links: [{ rel: "canonical", href: "/" }],
+    links: [{ rel: "canonical", href: "https://www.anselmodiascontador.com.br/" }],
   }),
   component: LandingPage,
 });
@@ -1318,7 +1318,10 @@ function SuccessCases() {
                           <CategoryIcon className="w-3.5 h-3.5 text-[#cbff1f] stroke-[2.2] flex-shrink-0" />
                           <span>{caseItem.category}</span>
                         </div>
-                        <span className="font-black text-3xl sm:text-4xl text-[#1e2323] tracking-tighter leading-none select-none">
+                        <span
+                          className="font-black text-3xl sm:text-4xl text-white/35 tracking-tighter leading-none select-none"
+                          aria-hidden="true"
+                        >
                           {caseItem.number}
                         </span>
                       </div>
@@ -1343,7 +1346,7 @@ function SuccessCases() {
                       <div className="grid grid-cols-2 gap-2 xl:gap-3 pt-1">
                         {/* Column 1: SITUAÇÃO */}
                         <div className="flex flex-col min-w-0">
-                          <div className="flex items-center gap-1 xl:gap-1.5 text-[#6b7280] text-[9.5px] sm:text-[10px] font-bold uppercase tracking-wider">
+                          <div className="flex items-center gap-1 xl:gap-1.5 text-[#9ca3af] text-[9.5px] sm:text-[10px] font-bold uppercase tracking-wider">
                             <AlertCircle className="w-3 h-3 xl:w-3.5 xl:h-3.5 text-[#cbff1f] stroke-[2.2] flex-shrink-0" />
                             <span>SITUAÇÃO</span>
                           </div>
@@ -1354,7 +1357,7 @@ function SuccessCases() {
 
                         {/* Column 2: ATUAÇÃO */}
                         <div className="flex flex-col min-w-0">
-                          <div className="flex items-center gap-1 xl:gap-1.5 text-[#6b7280] text-[9.5px] sm:text-[10px] font-bold uppercase tracking-wider">
+                          <div className="flex items-center gap-1 xl:gap-1.5 text-[#9ca3af] text-[9.5px] sm:text-[10px] font-bold uppercase tracking-wider">
                             <CheckCircle2 className="w-3 h-3 xl:w-3.5 xl:h-3.5 text-[#cbff1f] stroke-[2.2] flex-shrink-0" />
                             <span>ATUAÇÃO</span>
                           </div>
@@ -1631,24 +1634,27 @@ function Testimonials() {
         {/* Pagination Indicators */}
         {count > 0 && (
           <div
-            className="flex items-center justify-center gap-2.5 mt-8 sm:mt-10"
-            role="tablist"
+            className="flex items-center justify-center flex-wrap gap-0.5 sm:gap-1 mt-8 sm:mt-10"
+            role="group"
             aria-label="Indicadores dos depoimentos"
           >
             {Array.from({ length: count }).map((_, i) => (
               <button
                 key={i}
                 type="button"
-                role="tab"
-                aria-selected={current === i}
-                aria-label={`Ir para slide ${i + 1}`}
+                aria-current={current === i ? "true" : undefined}
+                aria-label={`Ver depoimento ${i + 1} de ${count}`}
                 onClick={() => api?.scrollTo(i)}
-                className={`transition-all duration-300 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#cbff1f] ${
-                  current === i
-                    ? "w-3 h-3 bg-[#cbff1f] shadow-[0_0_8px_rgba(203,255,31,0.5)]"
-                    : "w-2.5 h-2.5 bg-[#d1d5db] hover:bg-[#9ca3af]"
-                }`}
-              />
+                className="w-10 h-10 sm:w-11 sm:h-11 inline-flex items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 transition-all select-none"
+              >
+                <span
+                  className={`rounded-full transition-all duration-300 ${
+                    current === i
+                      ? "w-3 h-3 bg-[#111111]"
+                      : "w-2.5 h-2.5 bg-[#6b7280] hover:bg-[#111111]"
+                  }`}
+                />
+              </button>
             ))}
           </div>
         )}
