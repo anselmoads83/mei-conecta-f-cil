@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
   MessageCircle,
@@ -2069,8 +2069,15 @@ function Footer() {
 
         {/* Copyright Area */}
         <div className="text-center lg:text-right lg:pr-24 xl:pr-[380px]">
-          <p className="text-xs sm:text-sm text-[#9CA3AF]">
-            © 2026 Anselmo Dias Contador. Todos os direitos reservados.
+          <p className="text-xs sm:text-sm text-[#9CA3AF] flex flex-col sm:flex-row sm:inline-flex items-center justify-center lg:justify-end gap-1.5 sm:gap-3">
+            <span>© 2026 Anselmo Dias Contador. Todos os direitos reservados.</span>
+            <span className="hidden sm:inline text-white/20" aria-hidden="true">•</span>
+            <Link
+              to="/politica-de-privacidade"
+              className="text-white hover:text-[#CBFF1F] transition-colors duration-200"
+            >
+              Termos de Uso – Política de Privacidade
+            </Link>
           </p>
         </div>
       </div>

@@ -516,6 +516,20 @@ export function FloatingContactForm() {
                   <Send className="w-4 h-4 text-black stroke-[2.4] flex-shrink-0 -rotate-12 translate-x-0.5" aria-hidden="true" />
                   <span>{isSubmitting ? "ENVIANDO..." : "ENVIAR MENSAGEM"}</span>
                 </button>
+
+                {/* Aviso de Privacidade do Formulário */}
+                <p className="mt-3 text-center text-[11px] sm:text-xs text-[#6B7280] leading-relaxed">
+                  Seus dados serão utilizados para responder à sua solicitação. Saiba mais em nossa{" "}
+                  <a
+                    href="/politica-de-privacidade"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-black font-semibold underline underline-offset-2 hover:text-black/80 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-black rounded-sm"
+                  >
+                    Política de Privacidade
+                  </a>
+                  .
+                </p>
               </form>
             </div>
           </div>
