@@ -261,15 +261,12 @@ function Header() {
         <div className="flex items-center gap-2.5 sm:gap-3">
           {/* Action Buttons (Desktop & Tablet) */}
           <div className="hidden sm:flex items-center gap-2.5 sm:gap-3">
-            <button
-              type="button"
-              disabled
-              aria-disabled="true"
-              title="Em breve"
-              className="inline-flex items-center justify-center rounded-full border border-[#CBFF1F] bg-transparent px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-[#CBFF1F] transition-all duration-200 cursor-not-allowed opacity-90 hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CBFF1F] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+            <a
+              href="https://app.anselmodiascontador.com.br/login"
+              className="inline-flex items-center justify-center rounded-full border border-[#CBFF1F] bg-transparent px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-[#CBFF1F] transition-all duration-200 hover:bg-[#CBFF1F]/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CBFF1F] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
             >
               Entrar
-            </button>
+            </a>
             <button
               type="button"
               disabled
@@ -314,15 +311,13 @@ function Header() {
             ))}
           </nav>
           <div className="pt-3 border-t border-white/10 flex flex-col gap-2.5">
-            <button
-              type="button"
-              disabled
-              aria-disabled="true"
-              title="Em breve"
-              className="w-full inline-flex items-center justify-center rounded-full border border-[#CBFF1F] bg-transparent py-3 text-sm font-semibold text-[#CBFF1F] transition-all duration-200 cursor-not-allowed opacity-90"
+            <a
+              href="https://app.anselmodiascontador.com.br/login"
+              onClick={() => setMobileMenuOpen(false)}
+              className="w-full inline-flex items-center justify-center rounded-full border border-[#CBFF1F] bg-transparent py-3 text-sm font-semibold text-[#CBFF1F] transition-all duration-200 hover:bg-[#CBFF1F]/10"
             >
               Entrar
-            </button>
+            </a>
             <button
               type="button"
               disabled
