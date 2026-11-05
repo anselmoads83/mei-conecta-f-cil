@@ -44,6 +44,8 @@ import anselmoPhotoHero from "@/assets/images/hero-anselmo.jpg";
 import logoImg from "@/assets/images/logo-anselmo-dias.webp";
 import heroGeometricImg from "@/assets/images/hero-geometric.webp";
 import brazilFlagImg from "@/assets/images/brazil-flag-waving.png";
+import googlePlayBadge from "@/assets/images/google-play-badge.png";
+import appStoreBadge from "@/assets/images/app-store-badge.png";
 import marcosAlvesImg from "@/assets/images/testimonials/marcos-alves.webp";
 import mayaraSantosImg from "@/assets/images/testimonials/mayara-santos.webp";
 import joaoManoelImg from "@/assets/images/testimonials/joao-manoel.webp";
@@ -2072,12 +2074,58 @@ function Footer() {
           </div>
         </div>
 
+        {/* App Download Section (Google Play & App Store) */}
+        <div className="mt-12 sm:mt-14 lg:mt-16 flex flex-col items-center">
+          <div className="flex items-center justify-center gap-4 sm:gap-6 w-full max-w-2xl mx-auto mb-6 sm:mb-8">
+            <div className="h-[1px] flex-1 bg-[#CBFF1F]" aria-hidden="true" />
+            <h3 className="text-white text-base sm:text-lg font-semibold whitespace-nowrap tracking-tight font-['Poppins',sans-serif]">
+              Baixe nosso aplicativo
+            </h3>
+            <div className="h-[1px] flex-1 bg-[#CBFF1F]" aria-hidden="true" />
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
+            <a
+              href="https://play.google.com/store/apps/details?id=com.openmei.anselmodiascontador"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Disponível no Google Play"
+              className="inline-block transition-transform duration-200 hover:scale-[1.03] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CBFF1F] focus-visible:ring-offset-2 focus-visible:ring-offset-black rounded-lg select-none"
+            >
+              <img
+                src={googlePlayBadge}
+                alt="Disponível no Google Play"
+                width={566}
+                height={170}
+                className="h-[52px] sm:h-[56px] md:h-[58px] w-auto object-contain"
+                loading="lazy"
+              />
+            </a>
+            <a
+              href="https://apps.apple.com/br/app/anselmo-dias-contador/id6813148702"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Disponível na Apple App Store"
+              className="inline-block transition-transform duration-200 hover:scale-[1.03] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CBFF1F] focus-visible:ring-offset-2 focus-visible:ring-offset-black rounded-lg select-none"
+            >
+              <img
+                src={appStoreBadge}
+                alt="Disponível na Apple App Store"
+                width={950}
+                height={285}
+                className="h-[52px] sm:h-[56px] md:h-[58px] w-auto object-contain"
+                loading="lazy"
+              />
+            </a>
+          </div>
+        </div>
+
         {/* Thin Horizontal Divider beneath the 3 columns */}
         <div className="w-full h-px bg-white/10 mt-12 sm:mt-14 lg:mt-16 mb-6 sm:mb-8" />
 
         {/* Copyright Area */}
-        <div className="text-center lg:text-right lg:pr-24 xl:pr-[380px]">
-          <p className="text-xs sm:text-sm text-[#9CA3AF] flex flex-col sm:flex-row sm:inline-flex items-center justify-center lg:justify-end gap-1.5 sm:gap-3">
+        <div className="text-center">
+          <p className="text-xs sm:text-sm text-[#9CA3AF] flex flex-col sm:flex-row sm:inline-flex items-center justify-center gap-1.5 sm:gap-3">
             <span>© 2026 Anselmo Dias Contador. Todos os direitos reservados.</span>
             <span className="hidden sm:inline text-white/20" aria-hidden="true">•</span>
             <Link
