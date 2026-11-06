@@ -101,6 +101,14 @@ export function FloatingContactForm() {
     setIsOpen(true);
   }, []);
 
+  useEffect(() => {
+    const handleGlobalOpen = () => handleOpen();
+    window.addEventListener("ad_open_contact_form", handleGlobalOpen);
+    return () => {
+      window.removeEventListener("ad_open_contact_form", handleGlobalOpen);
+    };
+  }, [handleOpen]);
+
   const handleClose = useCallback(() => {
     setIsOpen(false);
   }, []);
@@ -236,7 +244,7 @@ export function FloatingContactForm() {
 
   return (
     <>
-      {/* Floating Neon-Green Contact Button (Side-by-side with WhatsApp) */}
+      {/* Floating Neon-Green Contact Button (Desktop: Side-by-side with WhatsApp) */}
       <button
         ref={triggerButtonRef}
         type="button"
@@ -244,7 +252,7 @@ export function FloatingContactForm() {
         aria-label="Fale Conosco"
         aria-haspopup="dialog"
         aria-expanded={isOpen}
-        className="fixed bottom-5 right-[84px] sm:bottom-6 sm:right-[92px] xl:right-[312px] z-40 w-14 h-14 rounded-full bg-[#CBFF1F] text-black shadow-lg flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CBFF1F] focus-visible:ring-offset-2 focus-visible:ring-offset-black select-none flex-shrink-0"
+        className="hidden md:flex fixed bottom-6 right-[92px] xl:right-[312px] z-40 w-14 h-14 rounded-full bg-[#CBFF1F] text-black shadow-lg items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CBFF1F] focus-visible:ring-offset-2 focus-visible:ring-offset-black select-none flex-shrink-0"
       >
         <Mail className="w-7 h-7 text-black stroke-[2]" aria-hidden="true" />
       </button>

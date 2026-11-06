@@ -67,6 +67,8 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel";
 import { FloatingContactForm } from "@/components/FloatingContactForm";
+import { FloatingMobileMenu } from "@/components/FloatingMobileMenu";
+import { Mei360AutoPopup } from "@/components/Mei360AutoPopup";
 
 // Número WhatsApp: (11) 98330-2016
 const WHATSAPP_NUMBER = "5511983302016";
@@ -209,6 +211,8 @@ function LandingPage() {
       <Footer />
       <FloatingWhatsApp />
       <FloatingContactForm />
+      <FloatingMobileMenu />
+      <Mei360AutoPopup />
     </div>
   );
 }

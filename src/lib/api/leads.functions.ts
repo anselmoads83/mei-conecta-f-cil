@@ -26,3 +26,17 @@ export const submitContactLead = createServerFn({ method: "POST" })
     const publicInput = sanitizePublicLeadInput(data);
     return await submitLeadFromServer(publicInput, { headers });
   });
+
+export const submitMei360Lead = createServerFn({ method: "POST" })
+  .validator((data: PublicLeadFormSubmissionInput) => sanitizePublicLeadInput(data))
+  .handler(async ({ data }): Promise<LeadSubmissionResult> => {
+    let headers: Headers | Record<string, string | undefined> | undefined;
+    try {
+      headers = getRequestHeaders() as unknown as Headers | Record<string, string | undefined>;
+    } catch {
+      headers = undefined;
+    }
+
+    const publicInput = sanitizePublicLeadInput(data);
+    return await submitLeadFromServer(publicInput, { headers });
+  });

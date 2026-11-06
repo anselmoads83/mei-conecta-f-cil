@@ -829,3 +829,55 @@ test("[política zero-trust] requisições externas sem Origin e Referer são re
   );
   assert.equal(rLegitimateBrowser.ok, true);
 });
+
+
+test("[etapa 11 - mei 360] aceita envio com origem popup-desktop-mei-360 e menu-mobile-mei-360 sem campo mensagem", async () => {
+  const { submitLead, sqlCalls } = createConnectedSetup();
+
+  // Desktop popup MEI 360
+  const rDesktop = await submitLead({
+    name: "Empreendedor Desktop 360",
+    phone: "(11) 98765-4321",
+    email: "desktop.360@teste.com",
+    origem: "popup-desktop-mei-360",
+    elapsedMs: 2500,
+  });
+  assert.equal(rDesktop.ok, true);
+  if (rDesktop.ok) {
+    assert.equal(rDesktop.status, 201);
+    assert.equal(rDesktop.gravado, true);
+  }
+
+  // Mobile menu MEI 360
+  const rMobile = await submitLead({
+    name: "Empreendedor Mobile 360",
+    phone: "(11) 98765-4322",
+    email: "mobile.360@teste.com",
+    origem: "menu-mobile-mei-360",
+    elapsedMs: 2500,
+  });
+  assert.equal(rMobile.ok, true);
+  if (rMobile.ok) {
+    assert.equal(rMobile.status, 201);
+    assert.equal(rMobile.gravado, true);
+  }
+
+  // Verifica parâmetros inseridos no banco: origem correta e mensagem null
+  assert.equal(sqlCalls.length, 2);
+  const desktopValues = sqlCalls[0].values;
+  // ordem: nome, email, whatsapp, tipo_atividade, origem, mensagem
+  assert.equal(desktopValues[0], "Empreendedor Desktop 360");
+  assert.equal(desktopValues[1], "desktop.360@teste.com");
+  assert.equal(desktopValues[2], "11987654321");
+  assert.equal(desktopValues[3], null);
+  assert.equal(desktopValues[4], "popup-desktop-mei-360");
+  assert.equal(desktopValues[5], null);
+
+  const mobileValues = sqlCalls[1].values;
+  assert.equal(mobileValues[0], "Empreendedor Mobile 360");
+  assert.equal(mobileValues[1], "mobile.360@teste.com");
+  assert.equal(mobileValues[2], "11987654322");
+  assert.equal(mobileValues[3], null);
+  assert.equal(mobileValues[4], "menu-mobile-mei-360");
+  assert.equal(mobileValues[5], null);
+});

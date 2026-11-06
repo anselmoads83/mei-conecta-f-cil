@@ -73,7 +73,7 @@ export interface EdgeFunctionLeadPayload {
   whatsapp: string;
   tipo_atividade: string | null;
   origem: string;
-  mensagem: string;
+  mensagem: string | null;
   validar_apenas?: boolean;
 }
 
@@ -237,18 +237,6 @@ export function validateAndMapFormInput(input: unknown):
     fieldErrors.email = "Informe um endereço de e-mail válido.";
   }
 
-  // 4. Sua mensagem (preservada integralmente até 1.000 caracteres, sem truncamento)
-  const rawMessage = typeof data.message === "string" ? data.message.trim() : "";
-  if (!rawMessage) {
-    fieldErrors.message = "Por favor, digite sua mensagem.";
-  } else if (rawMessage.length < FORM_LIMITS.mensagemMin) {
-    fieldErrors.message = "A mensagem deve conter pelo menos 10 caracteres.";
-  } else if (rawMessage.length > FORM_LIMITS.mensagemMax) {
-    fieldErrors.message = "A mensagem não pode exceder 1000 caracteres.";
-  } else if (CONTROL_CHARS_REGEX.test(rawMessage)) {
-    fieldErrors.message = "A mensagem contém caracteres inválidos.";
-  }
-
   // 5. tipo_atividade (preservado como opcional, padrão null)
   let tipoAtividade: string | null = null;
   if (data.tipo_atividade !== undefined && data.tipo_atividade !== null) {
@@ -277,6 +265,37 @@ export function validateAndMapFormInput(input: unknown):
         origem = trimmedOrigem;
       }
     }
+  }
+
+  const isMei360 = origem === "popup-desktop-mei-360" || origem === "menu-mobile-mei-360";
+
+  // 4. Sua mensagem (obrigatória para formulário de contato padrão, opcional para MEI 360°)
+  let rawMessage: string | null = null;
+  if (data.message === undefined || data.message === null || (isMei360 && typeof data.message === "string" && data.message.trim() === "")) {
+    if (!isMei360) {
+      fieldErrors.message = "Por favor, digite sua mensagem.";
+    } else {
+      rawMessage = null;
+    }
+  } else if (typeof data.message === "string") {
+    const trimmed = data.message.trim();
+    if (!trimmed) {
+      if (!isMei360) {
+        fieldErrors.message = "Por favor, digite sua mensagem.";
+      } else {
+        rawMessage = null;
+      }
+    } else if (trimmed.length < FORM_LIMITS.mensagemMin && !isMei360) {
+      fieldErrors.message = "A mensagem deve conter pelo menos 10 caracteres.";
+    } else if (trimmed.length > FORM_LIMITS.mensagemMax) {
+      fieldErrors.message = "A mensagem não pode exceder 1000 caracteres.";
+    } else if (CONTROL_CHARS_REGEX.test(trimmed)) {
+      fieldErrors.message = "A mensagem contém caracteres inválidos.";
+    } else {
+      rawMessage = trimmed;
+    }
+  } else {
+    fieldErrors.message = "A mensagem deve ser um texto válido.";
   }
 
   // 7. validar_apenas (opcional, booleano)
@@ -589,7 +608,7 @@ export function createLeadSubmissionService(deps: LeadSubmissionServiceDeps = {}
 
     // 6. Deduplicação por conteúdo exato (independente de IP)
     const payloadHash = sha256Hex(
-      `${validation.contactEmail}|${validation.contactWhatsappDigits}|${validation.payload.mensagem}`,
+      `${validation.contactEmail}|${validation.contactWhatsappDigits}|${validation.payload.mensagem ?? 'null'}`,
     );
     const duplicateExpiresAt = duplicatePayloads.get(payloadHash);
     if (duplicateExpiresAt !== undefined && duplicateExpiresAt > currentTime) {
