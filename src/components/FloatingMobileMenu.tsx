@@ -16,9 +16,15 @@ export function FloatingMobileMenu() {
     setIsMenuOpen(false);
   }, []);
 
-  // Fecha o menu com tecla Escape
+  // Fecha o menu com tecla Escape e gerencia o foco do teclado
   useEffect(() => {
     if (!isMenuOpen) return;
+
+    // Foca o primeiro item do menu ao expandir
+    const timer = setTimeout(() => {
+      const firstItem = menuRef.current?.querySelector<HTMLButtonElement>('[role="menuitem"]');
+      firstItem?.focus();
+    }, 50);
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -29,7 +35,10 @@ export function FloatingMobileMenu() {
     };
 
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
   }, [isMenuOpen, closeMenu]);
 
   const handleOpenContact = () => {

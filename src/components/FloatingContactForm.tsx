@@ -264,7 +264,7 @@ export function FloatingContactForm() {
           aria-modal="true"
           aria-labelledby="fale-conosco-title"
           aria-describedby="fale-conosco-desc"
-          className="fixed inset-0 z-50 overflow-y-auto"
+          className="fixed inset-0 z-[60] overflow-y-auto"
         >
           {/* Backdrop overlay */}
           <div

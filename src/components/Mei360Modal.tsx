@@ -60,11 +60,13 @@ export function Mei360Modal({ isOpen, onClose, origem }: Mei360ModalProps) {
 
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const nameInputRef = useRef<HTMLInputElement | null>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
   const openedAtRef = useRef<number | null>(null);
   const isSubmittingRef = useRef(false);
 
   useEffect(() => {
     if (isOpen) {
+      previousFocusRef.current = (document.activeElement as HTMLElement) || null;
       openedAtRef.current = Date.now();
       setSubmissionNotice(null);
       setSubmissionStatus("idle");
@@ -89,6 +91,7 @@ export function Mei360Modal({ isOpen, onClose, origem }: Mei360ModalProps) {
         document.body.style.overflow = originalOverflow;
         window.removeEventListener("keydown", handleKeyDown);
         clearTimeout(timer);
+        previousFocusRef.current?.focus();
       };
     }
   }, [isOpen]);
@@ -218,7 +221,7 @@ export function Mei360Modal({ isOpen, onClose, origem }: Mei360ModalProps) {
       aria-modal="true"
       aria-labelledby="mei360-title"
       aria-describedby="mei360-desc"
-      className="fixed inset-0 z-50 overflow-y-auto"
+      className="fixed inset-0 z-[60] overflow-y-auto"
     >
       {/* Backdrop com blur suave */}
       <div
@@ -231,14 +234,14 @@ export function Mei360Modal({ isOpen, onClose, origem }: Mei360ModalProps) {
       <div className="relative min-h-full flex items-center justify-center p-3 sm:p-5 md:p-6 pointer-events-none">
         <div
           ref={dialogRef}
-          className="pointer-events-auto relative w-full max-w-4xl bg-white rounded-2xl sm:rounded-3xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.6)] border border-black/10 overflow-hidden font-['Poppins',sans-serif] max-h-[calc(100dvh-2rem)] flex flex-col md:flex-row animate-in fade-in zoom-in-95 duration-200"
+          className="pointer-events-auto relative w-full max-w-4xl bg-white rounded-2xl sm:rounded-3xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.6)] border border-black/10 overflow-y-auto md:overflow-hidden font-['Poppins',sans-serif] max-h-[calc(100dvh-2rem)] flex flex-col md:flex-row animate-in fade-in zoom-in-95 duration-200"
         >
-          {/* Botão Fechar (X) acessível */}
+          {/* Botão Fechar (X) acessível com contraste responsivo */}
           <button
             type="button"
             onClick={handleClose}
             aria-label="Fechar pop-up MEI 360"
-            className="absolute top-3.5 right-3.5 z-20 w-9 h-9 rounded-full bg-black/10 hover:bg-black/20 text-black flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black cursor-pointer"
+            className="absolute top-3.5 right-3.5 z-20 w-9 h-9 rounded-full bg-white/20 hover:bg-white/30 text-white md:bg-black/10 md:hover:bg-black/20 md:text-black flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CBFF1F] md:focus-visible:ring-black cursor-pointer"
           >
             <X className="w-5 h-5 stroke-[2.5]" aria-hidden="true" />
           </button>
