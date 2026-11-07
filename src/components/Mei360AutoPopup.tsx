@@ -40,7 +40,6 @@ export function Mei360AutoPopup() {
       try {
         sessionStorage.setItem("ad_mei360_dismissed", "true");
       } catch {}
-      setIsOpen(true);
     };
 
     // Se outro formulário for acionado, cancela o temporizador para evitar sobreposições
