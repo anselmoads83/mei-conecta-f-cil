@@ -272,7 +272,7 @@ export function Mei360Modal({ isOpen, onClose, origem }: Mei360ModalProps) {
 
               {/* Mensagem curta */}
               <p className="text-white/85 text-xs sm:text-sm leading-relaxed mb-6">
-                Diagnóstico especializado para manter seu microempreendimento protegido, com obrigações em dia e pronto para crescer com segurança.
+                Diagnóstico especializado para manter seu MEI protegido e com as obrigações em dia, pronto para crescer com segurança.
               </p>
 
               {/* Três Benefícios */}
@@ -282,8 +282,8 @@ export function Mei360Modal({ isOpen, onClose, origem }: Mei360ModalProps) {
                     <CheckCircle2 className="w-4 h-4 stroke-[2.5]" aria-hidden="true" />
                   </div>
                   <div>
-                    <h4 className="text-xs sm:text-[13px] font-semibold text-white">Análise da situação do MEI</h4>
-                    <p className="text-[11px] sm:text-xs text-white/70 leading-snug">Verificação cadastral e tributária detalhada.</p>
+                    <h4 className="text-xs sm:text-[13px] font-semibold text-white">Análise da Situação do MEI</h4>
+                    <p className="text-[11px] sm:text-xs text-white/70 leading-snug">Verificação cadastral e tributária</p>
                   </div>
                 </div>
 
@@ -292,8 +292,8 @@ export function Mei360Modal({ isOpen, onClose, origem }: Mei360ModalProps) {
                     <CheckCircle2 className="w-4 h-4 stroke-[2.5]" aria-hidden="true" />
                   </div>
                   <div>
-                    <h4 className="text-xs sm:text-[13px] font-semibold text-white">Identificação de possíveis pendências</h4>
-                    <p className="text-[11px] sm:text-xs text-white/70 leading-snug">Prevenção contra multas e dívidas ativas.</p>
+                    <h4 className="text-xs sm:text-[13px] font-semibold text-white">Identificação de Pendências</h4>
+                    <p className="text-[11px] sm:text-xs text-white/70 leading-snug">Guias DAS e declarações em atraso</p>
                   </div>
                 </div>
 
@@ -302,8 +302,8 @@ export function Mei360Modal({ isOpen, onClose, origem }: Mei360ModalProps) {
                     <CheckCircle2 className="w-4 h-4 stroke-[2.5]" aria-hidden="true" />
                   </div>
                   <div>
-                    <h4 className="text-xs sm:text-[13px] font-semibold text-white">Orientações personalizadas</h4>
-                    <p className="text-[11px] sm:text-xs text-white/70 leading-snug">Atendimento humano focado na sua realidade.</p>
+                    <h4 className="text-xs sm:text-[13px] font-semibold text-white">Orientações Personalizadas</h4>
+                    <p className="text-[11px] sm:text-xs text-white/70 leading-snug">Consultoria especializada focada na sua realidade</p>
                   </div>
                 </div>
               </div>
@@ -457,7 +457,7 @@ export function Mei360Modal({ isOpen, onClose, origem }: Mei360ModalProps) {
                     <span>Processando envio seguro...</span>
                   ) : (
                     <>
-                      <span>QUERO MEU MEI 360°</span>
+                      <span>QUERO O DIAGNÓSTICO DO MEI</span>
                       <ArrowRight className="w-4 h-4 stroke-[2.5]" aria-hidden="true" />
                     </>
                   )}

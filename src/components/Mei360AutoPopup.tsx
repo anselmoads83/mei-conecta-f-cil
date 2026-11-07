@@ -5,7 +5,7 @@ import {
 } from "@/lib/cookie-consent";
 import { Mei360Modal } from "./Mei360Modal";
 
-const TIMER_DELAY_MS = 12000; // 12 segundos
+const TIMER_DELAY_MS = 6000; // 6 segundos
 
 export function Mei360AutoPopup() {
   const [isOpen, setIsOpen] = useState(false);
@@ -17,9 +17,13 @@ export function Mei360AutoPopup() {
 
     const isDesktop = () => window.innerWidth >= 768;
 
-    // Listener para abertura manual (ex: testes de homologação ou atalhos)
-    const handleManualOpen = () => setIsOpen(true);
-    window.addEventListener("ad_open_mei360_modal", handleManualOpen);
+    // Cancela o temporizador de forma segura
+    const cancelCountdown = () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+    };
 
     // 2. Se já foi dispensado ou submetido na sessão atual, não exibe automaticamente
     const isDismissed = () => {
@@ -30,15 +34,34 @@ export function Mei360AutoPopup() {
       }
     };
 
+    // Listener para abertura manual (ex: menu flutuante ou atalhos)
+    const handleManualOpen = () => {
+      cancelCountdown();
+      try {
+        sessionStorage.setItem("ad_mei360_dismissed", "true");
+      } catch {}
+      setIsOpen(true);
+    };
+
+    // Se outro formulário for acionado, cancela o temporizador para evitar sobreposições
+    const handleOtherFormOpen = () => {
+      cancelCountdown();
+    };
+
+    window.addEventListener("ad_open_mei360_modal", handleManualOpen);
+    window.addEventListener("ad_open_contact_form", handleOtherFormOpen);
+
     if (isDismissed()) {
       return () => {
         window.removeEventListener("ad_open_mei360_modal", handleManualOpen);
+        window.removeEventListener("ad_open_contact_form", handleOtherFormOpen);
+        cancelCountdown();
       };
     }
 
-    // Inicia o timer de 12 segundos se atender aos critérios
+    // Inicia o timer de 6 segundos se atender aos critérios
     const startCountdown = () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
+      cancelCountdown();
 
       timerRef.current = setTimeout(() => {
         // Verifica se a tela ainda é desktop e não foi dispensado
@@ -60,7 +83,7 @@ export function Mei360AutoPopup() {
     const existingConsent = getCookieConsent();
 
     if (existingConsent) {
-      // Visitante já resolveu os cookies em visita anterior -> inicia 12s após montagem
+      // Visitante já resolveu os cookies em visita anterior -> inicia 6s após montagem
       startCountdown();
     } else {
       // Visitante ainda não resolveu -> escuta o evento de resolução
@@ -71,14 +94,16 @@ export function Mei360AutoPopup() {
       window.addEventListener(CONSENT_CHANGED_EVENT, handleConsentResolved);
       return () => {
         window.removeEventListener("ad_open_mei360_modal", handleManualOpen);
+        window.removeEventListener("ad_open_contact_form", handleOtherFormOpen);
         window.removeEventListener(CONSENT_CHANGED_EVENT, handleConsentResolved);
-        if (timerRef.current) clearTimeout(timerRef.current);
+        cancelCountdown();
       };
     }
 
     return () => {
       window.removeEventListener("ad_open_mei360_modal", handleManualOpen);
-      if (timerRef.current) clearTimeout(timerRef.current);
+      window.removeEventListener("ad_open_contact_form", handleOtherFormOpen);
+      cancelCountdown();
     };
   }, []);
 

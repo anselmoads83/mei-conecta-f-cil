@@ -56,7 +56,7 @@ export function FloatingContactForm() {
   const [submissionStatus, setSubmissionStatus] = useState<"idle" | "success" | "error">("idle");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const triggerButtonRef = useRef<HTMLButtonElement | null>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const nameInputRef = useRef<HTMLInputElement | null>(null);
   const openedAtRef = useRef<number | null>(null);
@@ -65,6 +65,7 @@ export function FloatingContactForm() {
   // Focus management & Escape key handling
   useEffect(() => {
     if (isOpen) {
+      previousFocusRef.current = (document.activeElement as HTMLElement) || null;
       // Lock scroll while modal is active
       const originalOverflow = document.body.style.overflow;
       document.body.style.overflow = "hidden";
@@ -86,10 +87,8 @@ export function FloatingContactForm() {
         document.body.style.overflow = originalOverflow;
         window.removeEventListener("keydown", handleKeyDown);
         clearTimeout(timer);
+        previousFocusRef.current?.focus();
       };
-    } else {
-      // Return focus to trigger button when closing
-      triggerButtonRef.current?.focus();
     }
   }, [isOpen]);
 
@@ -244,18 +243,6 @@ export function FloatingContactForm() {
 
   return (
     <>
-      {/* Floating Neon-Green Contact Button (Desktop: Side-by-side with WhatsApp) */}
-      <button
-        ref={triggerButtonRef}
-        type="button"
-        onClick={handleOpen}
-        aria-label="Fale Conosco"
-        aria-haspopup="dialog"
-        aria-expanded={isOpen}
-        className="hidden md:flex fixed bottom-6 right-[92px] xl:right-[312px] z-40 w-14 h-14 rounded-full bg-[#CBFF1F] text-black shadow-lg items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CBFF1F] focus-visible:ring-offset-2 focus-visible:ring-offset-black select-none flex-shrink-0"
-      >
-        <Mail className="w-7 h-7 text-black stroke-[2]" aria-hidden="true" />
-      </button>
 
       {/* Floating Modal Contact Form */}
       {isOpen && (

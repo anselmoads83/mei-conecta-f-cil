@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Mail, X, Layers, ChevronUp, Sparkles } from "lucide-react";
+import { Mail, X, Layers, RefreshCw } from "lucide-react";
 import { Mei360Modal } from "./Mei360Modal";
 
 export function FloatingMobileMenu() {
@@ -48,14 +48,15 @@ export function FloatingMobileMenu() {
 
   const handleOpenMei360 = () => {
     closeMenu();
+    window.dispatchEvent(new CustomEvent("ad_open_mei360_modal"));
     setIsMei360Open(true);
   };
 
   return (
     <>
-      {/* Container visível exclusivamente em mobile (md:hidden) */}
-      <div className="flex md:hidden">
-        {/* Backdrop overlay para fechamento ao toque externo */}
+      {/* Menu flutuante unificado (Mobile e Desktop) */}
+      <div className="flex">
+        {/* Backdrop overlay para fechamento ao toque ou clique externo */}
         {isMenuOpen && (
           <div
             onClick={closeMenu}
@@ -71,7 +72,7 @@ export function FloatingMobileMenu() {
             role="menu"
             aria-orientation="vertical"
             aria-label="Opções de atendimento e diagnóstico"
-            className="fixed bottom-[88px] right-4 z-40 flex flex-col items-end gap-3 font-['Poppins',sans-serif] animate-in slide-in-from-bottom-3 fade-in duration-200"
+            className="fixed bottom-[88px] right-4 md:bottom-[96px] md:right-[92px] xl:right-[312px] z-40 flex flex-col items-end gap-3 font-['Poppins',sans-serif] animate-in slide-in-from-bottom-3 fade-in duration-200"
           >
             {/* Opção 1: MEI 360° */}
             <button
@@ -81,20 +82,15 @@ export function FloatingMobileMenu() {
               className="flex items-center gap-3 bg-[#000000] text-white border border-[#CBFF1F]/60 px-4 py-3 rounded-2xl shadow-2xl transition-all active:scale-95 text-right select-none group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CBFF1F]"
             >
               <div className="flex flex-col items-end">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[9px] uppercase tracking-wider font-extrabold px-1.5 py-0.5 rounded bg-[#CBFF1F] text-black">
-                    Novo
-                  </span>
-                  <span className="text-sm font-bold text-white tracking-tight">
-                    MEI 360°
-                  </span>
-                </div>
+                <span className="text-sm font-bold text-white tracking-tight">
+                  MEI 360°
+                </span>
                 <span className="text-[11px] text-white/70 font-normal">
                   Diagnóstico e orientação completa
                 </span>
               </div>
               <div className="w-10 h-10 rounded-full bg-[#CBFF1F] text-black flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform shadow-md">
-                <Sparkles className="w-5 h-5 stroke-[2.2]" aria-hidden="true" />
+                <RefreshCw className="w-5 h-5 stroke-[2.2]" aria-hidden="true" />
               </div>
             </button>
 
@@ -120,7 +116,7 @@ export function FloatingMobileMenu() {
           </div>
         )}
 
-        {/* Botão Gatilho do Menu Flutuante no Mobile */}
+        {/* Botão Gatilho do Menu Flutuante (Posicionado ao lado do WhatsApp no mobile e desktop) */}
         <button
           ref={triggerRef}
           type="button"
@@ -128,7 +124,7 @@ export function FloatingMobileMenu() {
           aria-label={isMenuOpen ? "Fechar menu de opções" : "Menu de opções de contato e diagnóstico"}
           aria-haspopup="menu"
           aria-expanded={isMenuOpen}
-          className={`fixed bottom-5 right-[78px] z-40 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 select-none flex-shrink-0 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CBFF1F] focus-visible:ring-offset-2 focus-visible:ring-offset-black cursor-pointer ${
+          className={`fixed bottom-5 right-[78px] md:bottom-6 md:right-[92px] xl:right-[312px] z-40 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 select-none flex-shrink-0 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CBFF1F] focus-visible:ring-offset-2 focus-visible:ring-offset-black cursor-pointer ${
             isMenuOpen
               ? "bg-black text-[#CBFF1F] border-2 border-[#CBFF1F] rotate-90"
               : "bg-[#CBFF1F] text-black hover:scale-105"
@@ -142,11 +138,11 @@ export function FloatingMobileMenu() {
         </button>
       </div>
 
-      {/* Modal MEI 360° para acionamento mobile */}
+      {/* Modal MEI 360° para acionamento manual (origem responsiva) */}
       <Mei360Modal
         isOpen={isMei360Open}
         onClose={() => setIsMei360Open(false)}
-        origem="menu-mobile-mei-360"
+        origem={typeof window !== "undefined" && window.innerWidth >= 768 ? "popup-desktop-mei-360" : "menu-mobile-mei-360"}
       />
     </>
   );
