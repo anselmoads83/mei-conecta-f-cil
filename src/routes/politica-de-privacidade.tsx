@@ -1,3 +1,5 @@
+import { StructuredData } from "@/components/StructuredData";
+import { privacySchema } from "@/lib/structured-data";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { ArrowLeft, Calendar, ChevronDown, Shield } from "lucide-react";
@@ -65,6 +67,7 @@ function PoliticaPrivacidadePage() {
 
   return (
     <div className="min-h-screen bg-[#000000] text-white selection:bg-[#CBFF1F] selection:text-black font-['Poppins',sans-serif]">
+      <StructuredData id="schema-privacy" data={privacySchema} />
       {/* ------------------------- Cabeçalho Oficial ------------------------- */}
       <header className="w-full bg-[#000000] border-b border-white/10">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-24 sm:h-28 flex items-center justify-between">

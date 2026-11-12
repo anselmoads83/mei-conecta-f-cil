@@ -1,3 +1,5 @@
+import { StructuredData } from "@/components/StructuredData";
+import { createHomeSchema, SITE_URL } from "@/lib/structured-data";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
@@ -189,6 +191,7 @@ function SectionDivider({ className = "" }: { className?: string }) {
 function LandingPage() {
   return (
     <div className="min-h-screen bg-white text-[#111111] font-sans overflow-x-clip">
+      <StructuredData id="schema-home" data={createHomeSchema(new URL(logoImg, SITE_URL).href)} />
       <Header />
       <main>
         <Hero />
