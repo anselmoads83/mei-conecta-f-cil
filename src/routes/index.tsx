@@ -1015,10 +1015,9 @@ function Plans() {
       services: [
         "Todos os serviços do plano PRO.",
         "Emissão de até 30 notas fiscais de serviço (NFS-e) por mês.",
-        "Emissão de até 30 notas fiscais de produto (NF-e) por mês.",
         "Notas adicionais ou emitidas pela equipe: R$ 8,50 cada.",
         "Desenquadramento do MEI.",
-        "Consultoria para transição do MEI ao Simples Nacional.",
+        "Consultoria para transição do MEI para Microempresa (ME) ou Empresa de Pequeno Porte (EPP), no Simples Nacional.",
         "Regularização de CNPJ INAPTO.",
         "Emissão de certidões negativas.",
         "Consultoria Fiscal estratégica.",
