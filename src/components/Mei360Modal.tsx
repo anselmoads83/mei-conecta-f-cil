@@ -99,7 +99,9 @@ export function Mei360Modal({ isOpen, onClose, origem }: Mei360ModalProps) {
   const handleClose = useCallback(() => {
     try {
       sessionStorage.setItem("ad_mei360_dismissed", "true");
-    } catch {}
+    } catch {
+      // Ignora indisponibilidade de sessionStorage
+    }
     onClose();
   }, [onClose]);
 
@@ -185,7 +187,9 @@ export function Mei360Modal({ isOpen, onClose, origem }: Mei360ModalProps) {
         );
         try {
           sessionStorage.setItem("ad_mei360_dismissed", "true");
-        } catch {}
+        } catch {
+          // Ignora indisponibilidade de sessionStorage
+        }
         setFormData({ name: "", phone: "", email: "" });
         setErrors({});
       } else {

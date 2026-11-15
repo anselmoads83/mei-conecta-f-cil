@@ -39,7 +39,9 @@ export function Mei360AutoPopup() {
       cancelCountdown();
       try {
         sessionStorage.setItem("ad_mei360_dismissed", "true");
-      } catch {}
+      } catch {
+        // Ignora indisponibilidade de sessionStorage
+      }
     };
 
     // Se outro formulário for acionado, cancela o temporizador para evitar sobreposições
