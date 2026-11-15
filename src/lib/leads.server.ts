@@ -34,7 +34,7 @@ export interface LeadFormSubmissionInput {
   name: unknown;
   phone: unknown;
   email: unknown;
-  message: unknown;
+  message?: unknown;
   tipo_atividade?: unknown;
   origem?: unknown;
   validar_apenas?: unknown;
@@ -125,6 +125,7 @@ export interface LeadSubmissionServiceDeps {
 }
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+// eslint-disable-next-line no-control-regex
 const CONTROL_CHARS_REGEX = /[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/;
 
 export function validateBrazilianPhoneDigits(raw: string): { ok: true; digits: string } | { ok: false } {
