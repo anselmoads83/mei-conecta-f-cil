@@ -488,35 +488,35 @@ test("[etapa 5.1b] chamada utiliza redirect: 'error' e bloqueia redirecionamento
   assert.equal(simulatedRedirectAttempts, 1);
 });
 
-test("[origem / proxy] aceita domínios autorizados (Bunny CDN, oficial www/apex, Guará Cloud) e rejeita ataques cross-site e spoofing", async () => {
+test("[origem / proxy] aceita domínios autorizados (oficial www/apex, Guará Cloud) e rejeita ataques cross-site e spoofing", async () => {
   const { submitLead, advanceTime } = createConnectedSetup();
 
-  // 1. Bunny CDN temporário com X-Forwarded-Host e Host da Guará Cloud -> 201 Aceito
-  const rBunnyXf = await submitLead(
-    { ...validFormInput, email: "teste.bunny1@empresa.com", phone: "(11) 98330-2001" },
+  // 1. Domínio da Guará Cloud com X-Forwarded-Host -> 201 Aceito
+  const rGuaraXf = await submitLead(
+    { ...validFormInput, email: "teste.guara1@empresa.com", phone: "(11) 98330-2001" },
     {
       headers: {
-        origin: "https://anselmodiascontador.b-cdn.net",
+        origin: "https://site-anselmo-dias-23f525-meu-projeto-a191.guaracloud.com",
         host: "site-anselmo-dias-23f525-meu-projeto-a191.guaracloud.com",
-        "x-forwarded-host": "anselmodiascontador.b-cdn.net",
+        "x-forwarded-host": "site-anselmo-dias-23f525-meu-projeto-a191.guaracloud.com",
         "sec-fetch-site": "same-origin",
       },
     },
   );
-  assert.equal(rBunnyXf.ok, true);
+  assert.equal(rGuaraXf.ok, true);
 
-  // 2. Bunny CDN sem X-Forwarded-Host (apenas Host interno da Guará Cloud) -> 201 Aceito pela lista estrita
-  const rBunnyDirect = await submitLead(
-    { ...validFormInput, email: "teste.bunny2@empresa.com", phone: "(11) 98330-2002" },
+  // 2. Domínio da Guará Cloud sem X-Forwarded-Host (apenas Host interno) -> 201 Aceito pela lista estrita
+  const rGuaraDirect = await submitLead(
+    { ...validFormInput, email: "teste.guara2@empresa.com", phone: "(11) 98330-2002" },
     {
       headers: {
-        origin: "https://anselmodiascontador.b-cdn.net",
+        origin: "https://site-anselmo-dias-23f525-meu-projeto-a191.guaracloud.com",
         host: "site-anselmo-dias-23f525-meu-projeto-a191.guaracloud.com",
         "sec-fetch-site": "same-origin",
       },
     },
   );
-  assert.equal(rBunnyDirect.ok, true);
+  assert.equal(rGuaraDirect.ok, true);
 
   // 3. Domínio oficial de produção (www.anselmodiascontador.com.br) via proxy -> 201 Aceito
   const rOficialWww = await submitLead(
@@ -543,12 +543,12 @@ test("[origem / proxy] aceita domínios autorizados (Bunny CDN, oficial www/apex
   );
   assert.equal(rOficialApex.ok, true);
 
-  // 5. Tentativa de spoofing com subdomínio malicioso (anselmodiascontador.b-cdn.net.malicious.com) -> 403 Bloqueado
+  // 5. Tentativa de spoofing com subdomínio malicioso (www.anselmodiascontador.com.br.malicious.com) -> 403 Bloqueado
   const rSpoof = await submitLead(
     { ...validFormInput, email: "teste.spoof@empresa.com", phone: "(11) 98330-2005" },
     {
       headers: {
-        origin: "https://anselmodiascontador.b-cdn.net.malicious.com",
+        origin: "https://www.anselmodiascontador.com.br.malicious.com",
         host: "site-anselmo-dias-23f525-meu-projeto-a191.guaracloud.com",
       },
     },
@@ -581,9 +581,9 @@ test("[origem / proxy] aceita domínios autorizados (Bunny CDN, oficial www/apex
     { ...validFormInput, email: "teste.hop@empresa.com", phone: "(11) 98330-2007" },
     {
       headers: {
-        origin: "https://anselmodiascontador.b-cdn.net",
+        origin: "https://www.anselmodiascontador.com.br",
         host: "10.0.0.1",
-        "x-forwarded-host": "anselmodiascontador.b-cdn.net, proxy-interno.guara",
+        "x-forwarded-host": "www.anselmodiascontador.com.br, proxy-interno.guara",
       },
     },
   );
@@ -767,12 +767,12 @@ test("[política zero-trust] requisições externas sem Origin e Referer são re
     assert.equal(rNoOriginOficial.error, "Origem da requisição não autorizada.");
   }
 
-  // 2. Requisição externa com Host da CDN (Bunny), mas sem Origin e sem Referer -> 403 Bloqueado
+  // 2. Requisição externa com Host não autorizado, sem Origin e sem Referer -> 403 Bloqueado
   const rNoOriginCdn = await submitLead(
     { ...validFormInput, email: "teste.noorigin2@empresa.com", phone: "(11) 98330-2202" },
     {
       headers: {
-        host: "anselmodiascontador.b-cdn.net",
+        host: "desconhecido.externo.com",
       },
     },
   );
