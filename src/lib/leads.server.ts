@@ -390,11 +390,10 @@ export function createLeadSubmissionService(deps: LeadSubmissionServiceDeps = {}
     return sha256Hex(`${ipPart}|${uaPart}`);
   }
 
-  // Domínios legítimos autorizados da aplicação (produção oficial, CDN e homologação)
+  // Domínios legítimos autorizados da aplicação (produção oficial e homologação)
   const DEFAULT_ALLOWED_ORIGIN_HOSTS = [
     "www.anselmodiascontador.com.br",
     "anselmodiascontador.com.br",
-    "anselmodiascontador.b-cdn.net",
     "site-anselmo-dias-23f525-meu-projeto-a191.guaracloud.com",
   ] as const;
 
