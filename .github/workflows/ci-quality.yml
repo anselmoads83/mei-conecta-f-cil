@@ -75,4 +75,4 @@ jobs:
         run: npx tsc --noEmit
 
       - name: Análise de regras de código (ESLint)
-        run: npx eslint src/ --rule "prettier/prettier: off"
+        run: 'npx eslint src/ --rule "prettier/prettier: off"'
