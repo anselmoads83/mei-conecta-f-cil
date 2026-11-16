@@ -952,6 +952,8 @@ function Plans() {
     return () => observer.disconnect();
   }, []);
 
+  const PLANS_WHATSAPP_NUMBER = "5511915470723";
+
   const plans = [
     {
       id: "start",
@@ -962,7 +964,7 @@ function Plans() {
       period: "/mês",
       highlighted: false,
       badge: null,
-      waLink: `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+      waLink: `https://wa.me/${PLANS_WHATSAPP_NUMBER}?text=${encodeURIComponent(
         "Olá! Tenho interesse no Plano START de R$ 99,00/mês. Gostaria de saber mais."
       )}`,
       services: [
@@ -985,7 +987,7 @@ function Plans() {
       period: "/mês",
       highlighted: true,
       badge: "MAIS ESCOLHIDO",
-      waLink: `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+      waLink: `https://wa.me/${PLANS_WHATSAPP_NUMBER}?text=${encodeURIComponent(
         "Olá! Tenho interesse no Plano PRO de R$ 169,00/mês. Gostaria de saber mais."
       )}`,
       services: [
@@ -1009,7 +1011,7 @@ function Plans() {
       period: "/mês",
       highlighted: false,
       badge: null,
-      waLink: `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+      waLink: `https://wa.me/${PLANS_WHATSAPP_NUMBER}?text=${encodeURIComponent(
         "Olá! Tenho interesse no Plano BLACK de R$ 269,00/mês. Gostaria de saber mais."
       )}`,
       services: [
