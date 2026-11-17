@@ -1698,13 +1698,13 @@ function FAQ() {
     },
     {
       id: "03",
-      q: "Entreguei a Declaração Anual do MEI com faturamento errado. Posso corrigir?",
-      a: "Sim. A DASN-SIMEI pode ser retificada para corrigir informações de faturamento declaradas incorretamente, inclusive quando foi transmitida sem movimento, embora tenha ocorrido receita. A correção deve refletir os valores efetivos do período e pode exigir a revisão de outras obrigações fiscais.",
+      q: "É possível ser MEI e ter carteira assinada (CLT)?",
+      a: "Sim. Você pode ter um emprego formal com carteira assinada e abrir um MEI. No entanto, em caso de demissão sem justa causa pelo emprego CLT, o trabalhador não tem direito ao Seguro-Desemprego se ficar comprovado que possui o MEI com faturamento ativo.",
     },
     {
       id: "04",
-      q: "Fui desenquadrado do MEI e não sabia. Posso regularizar minha empresa?",
-      a: "Sim. É necessário identificar o motivo e a data de efeito do desenquadramento, verificar possíveis impostos e declarações pendentes e adequar a empresa ao regime tributário correspondente. Dependendo da situação, o negócio poderá continuar como Microempresa (ME), com novas obrigações fiscais e contábeis.",
+      q: "Quais são os direitos e benefícios previdenciários do MEI?",
+      a: "Em troca do pagamento em dia da DAS, o empreendedor tem acesso a benefícios do INSS, como aposentadoria por idade, auxílio-doença, salário-maternidade e pensão por morte para os dependentes.",
     },
     {
       id: "05",
@@ -1713,8 +1713,8 @@ function FAQ() {
     },
     {
       id: "06",
-      q: "Sou MEI e presto serviços para empresas. Preciso emitir nota fiscal pelo sistema nacional?",
-      a: "Sim. O MEI prestador de serviços deve emitir a Nota Fiscal de Serviços eletrônica (NFS-e) pelo padrão nacional nas operações com pessoas jurídicas. A emissão pode ser realizada pelo Emissor Nacional, inclusive pelo aplicativo, observadas as regras aplicáveis à operação.",
+      q: "O MEI precisa declarar Imposto de Renda Pessoa Física (IRPF)?",
+      a: "Depende. O MEI entrega anualmente a DASN-SIMEI (Declaração Anual de Faturamento do Simples Nacional). Porém, na parte pessoal (Imposto de Renda Pessoa Física), ele só precisa declarar se se enquadrar nos critérios gerais da Receita Federal (por exemplo, rendimentos tributáveis acima do limite anual estipulado)",
     },
     {
       id: "07",
