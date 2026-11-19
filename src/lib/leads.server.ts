@@ -1,15 +1,17 @@
 import crypto from "node:crypto";
-import { getServerConfig } from "./config.server.ts";
+import { getServerConfig, type ServerConfig } from "./config.server.ts";
+import { cleanCnpjDigits, formatCnpj, validateCnpj } from "./cnpj.ts";
 
 // Módulo exclusivamente de servidor (.server.ts).
 // O Vite impede que este arquivo seja incluído no bundle do navegador,
-// garantindo que LEAD_INGEST_SECRET nunca seja exposto ao cliente.
+// garantindo que BREVO_API_KEY e configurações confidenciais nunca cheguem ao cliente.
 
 export const FORM_LIMITS = {
   nomeMin: 3,
   nomeMax: 100,
   emailMax: 120,
   whatsappRawMax: 30,
+  cnpjRawMax: 25,
   mensagemMin: 10,
   mensagemMax: 1000,
   tipoAtividadeMax: 150,
@@ -17,7 +19,7 @@ export const FORM_LIMITS = {
 } as const;
 
 export const PROTECTION_DEFAULTS = {
-  timeoutMs: 15_000,
+  timeoutMs: 10_000,
   minFillTimeMs: 1_200,
   duplicatePayloadTtlMs: 5 * 60 * 1_000, // 5 minutos para payload idêntico
   contactWindowMs: 2 * 60 * 1_000, // 2 minutos por e-mail/WhatsApp
@@ -30,10 +32,14 @@ export const PROTECTION_DEFAULTS = {
   maxTrackedKeys: 2_000,
 } as const;
 
+export const BREVO_API_ENDPOINT = "https://api.brevo.com/v3/smtp/email";
+
 export interface LeadFormSubmissionInput {
   name: unknown;
   phone: unknown;
   email: unknown;
+  cnpj?: unknown;
+  consentimento_comunicados?: unknown;
   message?: unknown;
   tipo_atividade?: unknown;
   origem?: unknown;
@@ -59,7 +65,11 @@ export function sanitizePublicLeadInput(input: unknown): PublicLeadFormSubmissio
     name: data.name,
     phone: data.phone,
     email: data.email,
-    message: data.message,
+    ...(data.cnpj !== undefined ? { cnpj: data.cnpj } : {}),
+    ...(data.consentimento_comunicados !== undefined
+      ? { consentimento_comunicados: data.consentimento_comunicados }
+      : {}),
+    ...(data.message !== undefined ? { message: data.message } : {}),
     ...(data.tipo_atividade !== undefined ? { tipo_atividade: data.tipo_atividade } : {}),
     ...(data.origem !== undefined ? { origem: data.origem } : {}),
     ...(data.honeypot !== undefined ? { honeypot: data.honeypot } : {}),
@@ -67,10 +77,15 @@ export function sanitizePublicLeadInput(input: unknown): PublicLeadFormSubmissio
   };
 }
 
-export interface EdgeFunctionLeadPayload {
+export interface ValidatedLeadPayload {
   nome: string;
   email: string;
   whatsapp: string;
+  cnpj: string | null;
+  cnpjFormatado: string | null;
+  consentimentoComunicados: boolean;
+  consentimentoData: string | null;
+  consentimentoVersao: string | null;
   tipo_atividade: string | null;
   origem: string;
   mensagem: string | null;
@@ -96,28 +111,31 @@ export type LeadSubmissionErrorCode =
 export type LeadSubmissionResult =
   | {
       ok: true;
-      status: 200 | 201;
-      validado?: boolean;
-      gravado: boolean;
+      status: 201;
+      enviado: boolean;
+      gravado: true; // mantido para compatibilidade reversa com os consumidores do front-end
+      internalNotificationSent: boolean;
+      visitorConfirmationSent: boolean;
+    }
+  | {
+      ok: true;
+      status: 200;
+      validado: true;
+      enviado: false;
+      gravado: false;
     }
   | {
       ok: false;
-      status: 400 | 403 | 429 | 503;
+      status: 400 | 403 | 429 | 502 | 503;
       code: LeadSubmissionErrorCode;
       error: string;
-      fieldErrors?: Partial<Record<"name" | "phone" | "email" | "message" | "tipo_atividade" | "origem", string>>;
+      fieldErrors?: Partial<
+        Record<"name" | "phone" | "email" | "cnpj" | "message" | "tipo_atividade" | "origem", string>
+      >;
     };
 
-export interface ServerConfigProvider {
-  leadIngestSecret?: string;
-  supabaseUrl?: string;
-  supabaseAnonKey?: string;
-  supabaseEdgeFunctionUrl?: string;
-  allowedOrigins?: string;
-}
-
 export interface LeadSubmissionServiceDeps {
-  getConfig?: () => ServerConfigProvider;
+  getConfig?: () => ServerConfig;
   fetchImpl?: typeof fetch;
   now?: () => number;
   timeoutMs?: number;
@@ -127,6 +145,19 @@ export interface LeadSubmissionServiceDeps {
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 // eslint-disable-next-line no-control-regex
 const CONTROL_CHARS_REGEX = /[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/;
+
+/**
+ * Escapa caracteres sensíveis para evitar que entradas de formulário
+ * sejam interpretadas como HTML executável nos templates.
+ */
+export function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
 
 export function validateBrazilianPhoneDigits(raw: string): { ok: true; digits: string } | { ok: false } {
   const digits = raw.replace(/\D/g, "");
@@ -157,18 +188,10 @@ function getHeader(
   return undefined;
 }
 
-function resolveEdgeFunctionUrl(config: ServerConfigProvider): string | null {
-  const direct = config.supabaseEdgeFunctionUrl?.trim();
-  if (direct) return direct;
-  const baseUrl = config.supabaseUrl?.trim();
-  if (!baseUrl) return null;
-  return `${baseUrl.replace(/\/+$/, "")}/functions/v1/receber-lead`;
-}
-
 export function validateAndMapFormInput(input: unknown):
   | {
       ok: true;
-      payload: EdgeFunctionLeadPayload;
+      payload: ValidatedLeadPayload;
       contactEmail: string;
       contactWhatsappDigits: string;
       honeypotTriggered: boolean;
@@ -176,7 +199,9 @@ export function validateAndMapFormInput(input: unknown):
     }
   | {
       ok: false;
-      fieldErrors: Partial<Record<"name" | "phone" | "email" | "message" | "tipo_atividade" | "origem", string>>;
+      fieldErrors: Partial<
+        Record<"name" | "phone" | "email" | "cnpj" | "message" | "tipo_atividade" | "origem", string>
+      >;
     } {
   if (typeof input !== "object" || input === null || Array.isArray(input)) {
     return {
@@ -186,9 +211,11 @@ export function validateAndMapFormInput(input: unknown):
   }
 
   const data = input as Record<string, unknown>;
-  const fieldErrors: Partial<Record<"name" | "phone" | "email" | "message" | "tipo_atividade" | "origem", string>> = {};
+  const fieldErrors: Partial<
+    Record<"name" | "phone" | "email" | "cnpj" | "message" | "tipo_atividade" | "origem", string>
+  > = {};
 
-  // Honeypot anti-bot: qualquer valor não vazio indica preenchimento automatizado.
+  // Honeypot anti-bot
   const honeypotTriggered =
     typeof data.honeypot === "string"
       ? data.honeypot.trim().length > 0
@@ -238,22 +265,7 @@ export function validateAndMapFormInput(input: unknown):
     fieldErrors.email = "Informe um endereço de e-mail válido.";
   }
 
-  // 5. tipo_atividade (preservado como opcional, padrão null)
-  let tipoAtividade: string | null = null;
-  if (data.tipo_atividade !== undefined && data.tipo_atividade !== null) {
-    if (typeof data.tipo_atividade !== "string") {
-      fieldErrors.tipo_atividade = "O campo tipo de atividade é inválido.";
-    } else {
-      const trimmedTipo = data.tipo_atividade.trim();
-      if (trimmedTipo.length === 0 || trimmedTipo.length > FORM_LIMITS.tipoAtividadeMax) {
-        fieldErrors.tipo_atividade = "O campo tipo de atividade deve ter entre 1 e 150 caracteres.";
-      } else {
-        tipoAtividade = trimmedTipo;
-      }
-    }
-  }
-
-  // 6. origem (padrão "site-floating-form")
+  // Identificação do formulário pela origem
   let origem = "site-floating-form";
   if (data.origem !== undefined && data.origem !== null) {
     if (typeof data.origem !== "string") {
@@ -270,7 +282,32 @@ export function validateAndMapFormInput(input: unknown):
 
   const isMei360 = origem === "popup-desktop-mei-360" || origem === "menu-mobile-mei-360";
 
-  // 4. Sua mensagem (obrigatória para formulário de contato padrão, opcional para MEI 360°)
+  // 4. CNPJ (Obrigatório para MEI 360°, não aplicável para Fale Conosco)
+  let cleanedCnpj: string | null = null;
+  let formattedCnpj: string | null = null;
+  if (isMei360) {
+    const rawCnpj = typeof data.cnpj === "string" ? data.cnpj.trim() : "";
+    cleanedCnpj = cleanCnpjDigits(rawCnpj);
+    if (!rawCnpj) {
+      fieldErrors.cnpj = "Por favor, informe o CNPJ do seu MEI.";
+    } else if (cleanedCnpj.length !== 14 || !validateCnpj(cleanedCnpj)) {
+      fieldErrors.cnpj = "Informe um CNPJ válido com 14 dígitos (ex: 00.000.000/0000-00).";
+    } else {
+      formattedCnpj = formatCnpj(cleanedCnpj);
+    }
+  }
+
+  // 5. Consentimento para novidades e comunicados (Opcional para MEI 360°)
+  let consentimentoComunicados = false;
+  let consentimentoData: string | null = null;
+  let consentimentoVersao: string | null = null;
+  if (isMei360 && data.consentimento_comunicados === true) {
+    consentimentoComunicados = true;
+    consentimentoData = new Date().toISOString();
+    consentimentoVersao = "v1-2026-11";
+  }
+
+  // 6. Mensagem (Obrigatória para Fale Conosco, Opcional/Nula para MEI 360°)
   let rawMessage: string | null = null;
   if (data.message === undefined || data.message === null || (isMei360 && typeof data.message === "string" && data.message.trim() === "")) {
     if (!isMei360) {
@@ -299,7 +336,22 @@ export function validateAndMapFormInput(input: unknown):
     fieldErrors.message = "A mensagem deve ser um texto válido.";
   }
 
-  // 7. validar_apenas (opcional, booleano)
+  // 7. tipo_atividade (opcional, padrão null)
+  let tipoAtividade: string | null = null;
+  if (data.tipo_atividade !== undefined && data.tipo_atividade !== null) {
+    if (typeof data.tipo_atividade !== "string") {
+      fieldErrors.tipo_atividade = "O campo tipo de atividade é inválido.";
+    } else {
+      const trimmedTipo = data.tipo_atividade.trim();
+      if (trimmedTipo.length === 0 || trimmedTipo.length > FORM_LIMITS.tipoAtividadeMax) {
+        fieldErrors.tipo_atividade = "O campo tipo de atividade deve ter entre 1 e 150 caracteres.";
+      } else {
+        tipoAtividade = trimmedTipo;
+      }
+    }
+  }
+
+  // 8. validar_apenas (opcional, booleano para testes)
   let validarApenas: boolean | undefined = undefined;
   if (data.validar_apenas !== undefined) {
     if (typeof data.validar_apenas === "boolean") {
@@ -313,10 +365,15 @@ export function validateAndMapFormInput(input: unknown):
     return { ok: false, fieldErrors };
   }
 
-  const payload: EdgeFunctionLeadPayload = {
+  const payload: ValidatedLeadPayload = {
     nome: rawName,
     email: normalizedEmail,
     whatsapp: rawPhone,
+    cnpj: cleanedCnpj,
+    cnpjFormatado: formattedCnpj,
+    consentimentoComunicados,
+    consentimentoData,
+    consentimentoVersao,
     tipo_atividade: tipoAtividade,
     origem,
     mensagem: rawMessage,
@@ -340,7 +397,7 @@ export function createLeadSubmissionService(deps: LeadSubmissionServiceDeps = {}
   const timeoutMs = deps.timeoutMs ?? PROTECTION_DEFAULTS.timeoutMs;
   const log = deps.log ?? (() => {});
 
-  // Estruturas limitadas em memória para rate-limit e deduplicação
+  // Estruturas de rate-limit e deduplicação limitadas em memória (Sem Banco de Dados)
   const duplicatePayloads = new Map<string, number>(); // hash -> expiresAt
   const contactBuckets = new Map<string, number[]>(); // contactKey -> timestamps
   const clientBuckets = new Map<string, number[]>(); // clientKey -> timestamps
@@ -375,8 +432,6 @@ export function createLeadSubmissionService(deps: LeadSubmissionServiceDeps = {}
   }
 
   function extractClientKey(meta?: RequestMetadata): string {
-    // Prioriza cabeçalho injetado pelo proxy da borda (Cloudflare/Guará Cloud),
-    // combinado com hash de User-Agent. Não é a única barreira de proteção.
     const cfIp = getHeader(meta?.headers, "cf-connecting-ip")?.trim();
     const realIp = getHeader(meta?.headers, "x-real-ip")?.trim();
     const xff = getHeader(meta?.headers, "x-forwarded-for");
@@ -390,34 +445,27 @@ export function createLeadSubmissionService(deps: LeadSubmissionServiceDeps = {}
     return sha256Hex(`${ipPart}|${uaPart}`);
   }
 
-  // Domínios legítimos autorizados da aplicação (produção oficial e homologação)
   const DEFAULT_ALLOWED_ORIGIN_HOSTS = [
     "www.anselmodiascontador.com.br",
     "anselmodiascontador.com.br",
     "site-anselmo-dias-23f525-meu-projeto-a191.guaracloud.com",
   ] as const;
 
-  const LOCAL_DEV_ALLOWED_HOSTS = [
-    "localhost",
-    "127.0.0.1",
-  ] as const;
+  const LOCAL_DEV_ALLOWED_HOSTS = ["localhost", "127.0.0.1"] as const;
 
   function getAllowedOriginsSet(customAllowedOrigins?: string): Set<string> {
     const allowed = new Set<string>();
 
-    // Domínios de produção/remotos: estritamente HTTPS
     for (const host of DEFAULT_ALLOWED_ORIGIN_HOSTS) {
       allowed.add(`https://${host}`);
     }
 
-    // Domínios locais de desenvolvimento: HTTP
     for (const host of LOCAL_DEV_ALLOWED_HOSTS) {
       allowed.add(`http://${host}`);
       allowed.add(`http://${host}:3000`);
       allowed.add(`http://${host}:5173`);
     }
 
-    // Origens customizadas passadas via variável de ambiente (ALLOWED_ORIGINS)
     if (customAllowedOrigins) {
       for (const item of customAllowedOrigins.split(",")) {
         const trimmed = item.trim();
@@ -437,16 +485,13 @@ export function createLeadSubmissionService(deps: LeadSubmissionServiceDeps = {}
   }
 
   function isCrossSiteRequest(meta?: RequestMetadata, allowedOriginsEnv?: string): boolean {
-    // 1. Se meta ou meta.headers não foi fornecido (chamada programática interna sem contexto HTTP),
-    // não há cabeçalhos HTTP de rede para analisar.
     if (!meta?.headers) {
       return false;
     }
 
-    // 2. Cabeçalho Sec-Fetch-Site: proteção nativa dos navegadores modernos contra CSRF
     const secFetchSite = getHeader(meta.headers, "sec-fetch-site")?.trim().toLowerCase();
     if (secFetchSite && secFetchSite === "cross-site") {
-      return true; // Se o navegador sinalizou cross-site, rejeita sumariamente
+      return true;
     }
 
     const rawOrigin = getHeader(meta.headers, "origin")?.trim();
@@ -455,7 +500,6 @@ export function createLeadSubmissionService(deps: LeadSubmissionServiceDeps = {}
     const rawUserAgent = getHeader(meta.headers, "user-agent")?.trim();
     const allowedOrigins = getAllowedOriginsSet(allowedOriginsEnv);
 
-    // 3. Validação prioritária por cabeçalho Origin (obrigatório em POST via fetch/AJAX em navegadores)
     if (rawOrigin) {
       if (rawOrigin === "null") return true;
 
@@ -469,7 +513,6 @@ export function createLeadSubmissionService(deps: LeadSubmissionServiceDeps = {}
       const origin = originUrl.origin.toLowerCase();
       const hostname = originUrl.hostname.toLowerCase();
 
-      // Protocolo: apenas HTTPS é aceito para produção/remotos (HTTP restrito a localhost/127.0.0.1)
       if (originUrl.protocol !== "https:") {
         const isLocalHost = hostname === "localhost" || hostname === "127.0.0.1";
         if (!isLocalHost || originUrl.protocol !== "http:") {
@@ -477,9 +520,6 @@ export function createLeadSubmissionService(deps: LeadSubmissionServiceDeps = {}
         }
       }
 
-      // Regra de segurança fundamental:
-      // O Origin DEVE obrigatoriamente constar na lista estrita de origens autorizadas.
-      // NUNCA confiamos exclusivamente em X-Forwarded-Host ou Host do cliente para autorizar domínios arbitrários.
       if (allowedOrigins.has(origin)) {
         return false;
       }
@@ -492,7 +532,6 @@ export function createLeadSubmissionService(deps: LeadSubmissionServiceDeps = {}
       return true;
     }
 
-    // 4. Validação alternativa por Referer (quando Origin estiver ausente)
     if (rawReferer) {
       let refererUrl: URL;
       try {
@@ -523,16 +562,80 @@ export function createLeadSubmissionService(deps: LeadSubmissionServiceDeps = {}
       return true;
     }
 
-    // 5. Política para requisições externas sem identificação de origem:
-    // Se a requisição apresenta cabeçalhos de rede HTTP (como Host, User-Agent ou Sec-Fetch-Site),
-    // mas NÃO apresenta nem Origin nem Referer:
-    // Esta ausência total de identificação de origem em um endpoint POST de formulário é considerada suspeita/não autorizada
-    // (previne bypass por bots, scripts curl sem Origin e ataques CSRF com <meta name="referrer" content="no-referrer">).
     if (rawHost || rawUserAgent || secFetchSite) {
-      return true; // Bloqueado: requisição HTTP externa sem comprovação de origem legítima
+      return true;
     }
 
     return false;
+  }
+
+  /**
+   * Despacha um e-mail transacional via API REST v3 da Brevo.
+   * Não grava em banco de dados e não insere contatos em listas de marketing.
+   */
+  async function sendBrevoTransactionalEmail(opts: {
+    apiKey: string;
+    senderName: string;
+    senderEmail: string;
+    recipientEmail: string;
+    recipientName: string;
+    templateId: number;
+    params: Record<string, unknown>;
+    signal: AbortSignal;
+  }): Promise<{ ok: boolean; status: number; errorMsg?: string }> {
+    const payload = {
+      sender: {
+        name: opts.senderName,
+        email: opts.senderEmail,
+      },
+      to: [
+        {
+          email: opts.recipientEmail,
+          name: opts.recipientName,
+        },
+      ],
+      templateId: opts.templateId,
+      params: opts.params,
+    };
+
+    try {
+      const response = await fetchImpl(BREVO_API_ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          accept: "application/json",
+          "api-key": opts.apiKey,
+        },
+        body: JSON.stringify(payload),
+        redirect: "error",
+        signal: opts.signal,
+      });
+
+      if (response.status === 201 || response.status === 200) {
+        return { ok: true, status: response.status };
+      }
+
+      let errorDetail = "";
+      try {
+        const errorJson = await response.json();
+        errorDetail = typeof errorJson === "object" && errorJson !== null ? JSON.stringify(errorJson) : "";
+      } catch {
+        // Ignora falha de parse do erro
+      }
+
+      return {
+        ok: false,
+        status: response.status,
+        errorMsg: `Brevo HTTP ${response.status}: ${errorDetail}`,
+      };
+    } catch (err) {
+      const isAbort = err instanceof Error && (err.name === "AbortError" || err.name === "TimeoutError");
+      return {
+        ok: false,
+        status: isAbort ? 504 : 503,
+        errorMsg: isAbort ? "Brevo Timeout" : "Brevo Network Error",
+      };
+    }
   }
 
   return async function submitLead(
@@ -542,7 +645,7 @@ export function createLeadSubmissionService(deps: LeadSubmissionServiceDeps = {}
     const currentTime = now();
     pruneExpired(currentTime);
 
-    // 1. Verificação de origem / Sec-Fetch-Site quando cabeçalhos da requisição estão presentes
+    // 1. Verificação de origem / Sec-Fetch-Site (CSRF)
     const config = getConfig();
     if (isCrossSiteRequest(meta, config.allowedOrigins)) {
       log("lead_rejected_cross_site");
@@ -554,7 +657,24 @@ export function createLeadSubmissionService(deps: LeadSubmissionServiceDeps = {}
       };
     }
 
-    // 2. Validação estrutural e mapeamento de campos
+    // 2. Honeypot anti-bot prioritário
+    const rawHoneypot = typeof input === "object" && input !== null ? (input as Record<string, unknown>).honeypot : undefined;
+    const honeypotTriggered =
+      typeof rawHoneypot === "string"
+        ? rawHoneypot.trim().length > 0
+        : rawHoneypot !== undefined && rawHoneypot !== null && rawHoneypot !== "";
+
+    if (honeypotTriggered) {
+      log("lead_rejected_honeypot");
+      return {
+        ok: false,
+        status: 400,
+        code: "spam_detected",
+        error: "Não foi possível processar o envio.",
+      };
+    }
+
+    // 3. Validação estrutural e mapeamento de campos
     const validation = validateAndMapFormInput(input);
     if (!validation.ok) {
       return {
@@ -566,18 +686,7 @@ export function createLeadSubmissionService(deps: LeadSubmissionServiceDeps = {}
       };
     }
 
-    // 3. Honeypot anti-bot
-    if (validation.honeypotTriggered) {
-      log("lead_rejected_honeypot");
-      return {
-        ok: false,
-        status: 400,
-        code: "spam_detected",
-        error: "Não foi possível processar o envio.",
-      };
-    }
-
-    // 4. Tempo mínimo humano de preenchimento (quando informado pelo cliente)
+    // 4. Tempo mínimo humano de preenchimento (< 1200ms)
     if (
       validation.elapsedMs !== null &&
       validation.elapsedMs >= 0 &&
@@ -592,7 +701,12 @@ export function createLeadSubmissionService(deps: LeadSubmissionServiceDeps = {}
       };
     }
 
-    // 5. Proteção global de concorrência e janela global (independente de IP)
+    // 5. Modo de validação exclusiva (sem envio de e-mails)
+    if (validation.payload.validar_apenas === true) {
+      return { ok: true, status: 200, validado: true, enviado: false, gravado: false };
+    }
+
+    // 6. Proteção global de concorrência e janela global em memória
     if (
       inFlightCount >= PROTECTION_DEFAULTS.maxConcurrent ||
       globalTimestamps.length >= PROTECTION_DEFAULTS.globalMaxPerWindow
@@ -606,9 +720,9 @@ export function createLeadSubmissionService(deps: LeadSubmissionServiceDeps = {}
       };
     }
 
-    // 6. Deduplicação por conteúdo exato (independente de IP)
+    // 7. Deduplicação por hash de conteúdo (5 minutos)
     const payloadHash = sha256Hex(
-      `${validation.contactEmail}|${validation.contactWhatsappDigits}|${validation.payload.mensagem ?? 'null'}`,
+      `${validation.contactEmail}|${validation.contactWhatsappDigits}|${validation.payload.cnpj ?? "sem_cnpj"}|${validation.payload.mensagem ?? "null"}`,
     );
     const duplicateExpiresAt = duplicatePayloads.get(payloadHash);
     if (duplicateExpiresAt !== undefined && duplicateExpiresAt > currentTime) {
@@ -621,9 +735,9 @@ export function createLeadSubmissionService(deps: LeadSubmissionServiceDeps = {}
       };
     }
 
-    // 7. Limite por identidade de contato (e-mail ou WhatsApp, independente de IP)
-    const emailKey = `email:${ sha256Hex(validation.contactEmail) }`;
-    const phoneKey = `phone:${ sha256Hex(validation.contactWhatsappDigits) }`;
+    // 8. Limite por identidade de contato (e-mail ou WhatsApp)
+    const emailKey = `email:${sha256Hex(validation.contactEmail)}`;
+    const phoneKey = `phone:${sha256Hex(validation.contactWhatsappDigits)}`;
     const emailHistory = contactBuckets.get(emailKey) ?? [];
     const phoneHistory = contactBuckets.get(phoneKey) ?? [];
     if (
@@ -639,7 +753,7 @@ export function createLeadSubmissionService(deps: LeadSubmissionServiceDeps = {}
       };
     }
 
-    // 8. Limite por chave composta de cliente (IP de borda + User-Agent)
+    // 9. Limite por chave composta de cliente (IP + User-Agent)
     const clientKey = extractClientKey(meta);
     const clientHistory = clientBuckets.get(clientKey) ?? [];
     if (clientHistory.length >= PROTECTION_DEFAULTS.clientMaxPerWindow) {
@@ -652,14 +766,10 @@ export function createLeadSubmissionService(deps: LeadSubmissionServiceDeps = {}
       };
     }
 
-    // 9. Verificação das credenciais de servidor
-    const secret = config.leadIngestSecret?.trim();
-    const anonKey = config.supabaseAnonKey?.trim();
-    const requiresAnonKey = Boolean(secret && secret.startsWith("sb_secret_"));
-    const bearerToken = requiresAnonKey ? anonKey : (anonKey || secret);
-    const edgeUrl = resolveEdgeFunctionUrl(config);
-    if (!secret || !edgeUrl || !bearerToken) {
-      log("lead_server_config_missing");
+    // 10. Validação das configurações da Brevo no servidor
+    const apiKey = config.brevoApiKey?.trim();
+    if (!apiKey) {
+      log("lead_brevo_api_key_missing");
       return {
         ok: false,
         status: 503,
@@ -668,62 +778,129 @@ export function createLeadSubmissionService(deps: LeadSubmissionServiceDeps = {}
       };
     }
 
-    // Registra tentativa nos limitadores de taxa
+    const isMei360 =
+      validation.payload.origem === "popup-desktop-mei-360" ||
+      validation.payload.origem === "menu-mobile-mei-360";
+
+    const internalTemplateId = isMei360
+      ? config.brevoTemplateMei360Internal
+      : config.brevoTemplateContactInternal;
+
+    const confirmationTemplateId = isMei360
+      ? config.brevoTemplateMei360Confirmation
+      : config.brevoTemplateContactConfirmation;
+
+    if (!internalTemplateId) {
+      log("lead_brevo_template_missing");
+      return {
+        ok: false,
+        status: 503,
+        code: "server_misconfigured",
+        error: "O envio online está temporariamente indisponível. Fale conosco pelo WhatsApp!",
+      };
+    }
+
+    // Registra tentativa nos limitadores em memória
     globalTimestamps.push(currentTime);
-    setBoundedMap( clientBuckets, clientKey, [...clientHistory, currentTime] );
+    setBoundedMap(clientBuckets, clientKey, [...clientHistory, currentTime]);
     inFlightCount++;
 
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
 
     try {
-      // Chamada servidor -> Supabase Edge Function (sem cabeçalho Origin).
-      // Se SUPABASE_ANON_KEY estiver configurada (cenário com Verify JWT ativo no Gateway),
-      // envia o JWT anon em Authorization e o LEAD_INGEST_SECRET em apikey.
-      // Caso contrário (Verify JWT desativado na função), envia LEAD_INGEST_SECRET em ambos.
-      const response = await fetchImpl(edgeUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${bearerToken}`,
-          apikey: secret,
-        },
-        body: JSON.stringify(validation.payload),
-        redirect: "error",
+      const nowFormatted = new Date(currentTime).toISOString();
+
+      // Monta os parâmetros higienizados para o e-mail interno
+      const internalParams: Record<string, unknown> = isMei360
+        ? {
+            NOME: escapeHtml(validation.payload.nome),
+            WHATSAPP: escapeHtml(validation.payload.whatsapp),
+            EMAIL: escapeHtml(validation.payload.email),
+            CNPJ: escapeHtml(validation.payload.cnpjFormatado || validation.payload.cnpj || ""),
+            ORIGEM: escapeHtml(validation.payload.origem),
+            CONSENTIMENTO: validation.payload.consentimentoComunicados ? "SIM" : "NÃO",
+            CONSENTIMENTO_STATUS: validation.payload.consentimentoComunicados,
+            DATA_HORA: nowFormatted,
+            TERMO_VERSAO: validation.payload.consentimentoVersao || "N/A",
+          }
+        : {
+            NOME: escapeHtml(validation.payload.nome),
+            WHATSAPP: escapeHtml(validation.payload.whatsapp),
+            EMAIL: escapeHtml(validation.payload.email),
+            MENSAGEM: escapeHtml(validation.payload.mensagem || ""),
+            ORIGEM: escapeHtml(validation.payload.origem),
+            DATA_HORA: nowFormatted,
+          };
+
+      // PASSO 1: Envia a Notificação Interna para a equipe
+      const internalResult = await sendBrevoTransactionalEmail({
+        apiKey,
+        senderName: config.brevoSenderName,
+        senderEmail: config.brevoSenderEmail,
+        recipientEmail: config.brevoNotificationEmail,
+        recipientName: "Equipe Anselmo Dias Contador",
+        templateId: internalTemplateId,
+        params: internalParams,
         signal: controller.signal,
       });
 
-      if (response.status === 201) {
-        setBoundedMap(duplicatePayloads, payloadHash, currentTime + PROTECTION_DEFAULTS.duplicatePayloadTtlMs);
-        setBoundedMap(contactBuckets, emailKey, [...emailHistory, currentTime]);
-        setBoundedMap(contactBuckets, phoneKey, [...phoneHistory, currentTime]);
-        return { ok: true, status: 201, gravado: true };
-      }
-
-      if (response.status === 200 && validation.payload.validar_apenas === true) {
-        return { ok: true, status: 200, validado: true, gravado: false };
-      }
-
-      if (response.status === 400) {
-        log("lead_upstream_validation_rejected");
+      if (!internalResult.ok) {
+        log(`lead_brevo_internal_failed_${internalResult.status}`);
         return {
           ok: false,
-          status: 400,
-          code: "validation_error",
-          error: "Não foi possível validar os dados informados. Verifique os campos e tente novamente.",
+          status: internalResult.status >= 500 ? 503 : 502,
+          code: "upstream_unavailable",
+          error: "Não foi possível concluir o envio da sua solicitação agora. Fale conosco pelo WhatsApp!",
         };
       }
 
-      log(`lead_upstream_error_${response.status}`);
+      // Notificação interna foi aceita pela Brevo com sucesso
+      setBoundedMap(duplicatePayloads, payloadHash, currentTime + PROTECTION_DEFAULTS.duplicatePayloadTtlMs);
+      setBoundedMap(contactBuckets, emailKey, [...emailHistory, currentTime]);
+      setBoundedMap(contactBuckets, phoneKey, [...phoneHistory, currentTime]);
+
+      // PASSO 2: Envia a Confirmação Automática ao Visitante (se template configurado)
+      let visitorConfirmationSent = false;
+      if (confirmationTemplateId) {
+        const visitorParams: Record<string, unknown> = isMei360
+          ? {
+              NOME: escapeHtml(validation.payload.nome),
+              PRAZO: "até 72 horas úteis",
+              DATA_HORA: nowFormatted,
+            }
+          : {
+              NOME: escapeHtml(validation.payload.nome),
+              DATA_HORA: nowFormatted,
+            };
+
+        const visitorResult = await sendBrevoTransactionalEmail({
+          apiKey,
+          senderName: config.brevoSenderName,
+          senderEmail: config.brevoSenderEmail,
+          recipientEmail: validation.payload.email,
+          recipientName: validation.payload.nome,
+          templateId: confirmationTemplateId,
+          params: visitorParams,
+          signal: controller.signal,
+        });
+
+        visitorConfirmationSent = visitorResult.ok;
+        if (!visitorResult.ok) {
+          log(`lead_brevo_visitor_confirmation_failed_${visitorResult.status}`);
+        }
+      }
+
       return {
-        ok: false,
-        status: 503,
-        code: "upstream_unavailable",
-        error: "Serviço temporariamente indisponível. Por favor, fale conosco pelo WhatsApp!",
+        ok: true,
+        status: 201,
+        enviado: true,
+        gravado: true,
+        internalNotificationSent: true,
+        visitorConfirmationSent,
       };
     } catch (error) {
-      const isAbort =
-        error instanceof Error && (error.name === "AbortError" || error.name === "TimeoutError");
+      const isAbort = error instanceof Error && (error.name === "AbortError" || error.name === "TimeoutError");
       log(isAbort ? "lead_upstream_timeout" : "lead_upstream_network_error");
       return {
         ok: false,

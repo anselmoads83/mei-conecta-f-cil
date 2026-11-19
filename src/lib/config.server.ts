@@ -3,26 +3,62 @@ import process from "node:process";
 // Server-only config. The .server.ts suffix prevents Vite from bundling
 // this file into the client — values here never reach the browser.
 //
-// On Cloudflare Workers, env binds at REQUEST time. Module-scope reads
+// On Cloudflare Workers / Nitro, env binds at REQUEST time. Module-scope reads
 // (e.g. `const x = process.env.X`) resolve to undefined — always read
 // process.env INSIDE a function or handler.
-//
-// When to use which env-access pattern:
-//   - .server.ts module (this file): server-only helpers reused across
-//     handlers. Wrap reads in a function so they run per-request.
-//   - inline process.env inside a createServerFn handler: one-off reads
-//     not reused elsewhere.
-//   - import.meta.env.VITE_FOO: PUBLIC config readable from both client
-//     and server (analytics IDs, public URLs). Define in .env with the
-//     VITE_ prefix. Never put secrets here — they ship to the browser.
 
-export function getServerConfig() {
+export interface ServerConfig {
+  nodeEnv?: string;
+  allowedOrigins?: string;
+
+  // Credenciais e Parâmetros da API Transacional Brevo
+  brevoApiKey?: string;
+  brevoSenderName: string;
+  brevoSenderEmail: string;
+  brevoNotificationEmail: string;
+
+  // IDs dos 4 Templates Transacionais cadastrados no Painel da Brevo
+  brevoTemplateMei360Internal?: number;
+  brevoTemplateMei360Confirmation?: number;
+  brevoTemplateContactInternal?: number;
+  brevoTemplateContactConfirmation?: number;
+
+  // Legado / Transição (opcional, sem dependência operacional)
+  leadIngestSecret?: string;
+  supabaseUrl?: string;
+  supabaseAnonKey?: string;
+  supabaseEdgeFunctionUrl?: string;
+}
+
+export function getServerConfig(): ServerConfig {
   return {
     nodeEnv: process.env.NODE_ENV,
+    allowedOrigins: process.env.ALLOWED_ORIGINS,
+
+    // Brevo API Transacional
+    brevoApiKey: process.env.BREVO_API_KEY,
+    brevoSenderName: process.env.BREVO_SENDER_NAME?.trim() || "Anselmo Dias Contador",
+    brevoSenderEmail: process.env.BREVO_SENDER_EMAIL?.trim() || "gestao@anselmodiascontador.com.br",
+    brevoNotificationEmail: process.env.BREVO_NOTIFICATION_EMAIL?.trim() || "gestao@anselmodiascontador.com.br",
+
+    // Identificadores numéricos dos templates transacionais configuráveis por ambiente
+    brevoTemplateMei360Internal: process.env.BREVO_TEMPLATE_MEI360_INTERNAL
+      ? Number(process.env.BREVO_TEMPLATE_MEI360_INTERNAL)
+      : undefined,
+    brevoTemplateMei360Confirmation: process.env.BREVO_TEMPLATE_MEI360_CONFIRMATION
+      ? Number(process.env.BREVO_TEMPLATE_MEI360_CONFIRMATION)
+      : undefined,
+    brevoTemplateContactInternal: process.env.BREVO_TEMPLATE_CONTACT_INTERNAL
+      ? Number(process.env.BREVO_TEMPLATE_CONTACT_INTERNAL)
+      : undefined,
+    brevoTemplateContactConfirmation: process.env.BREVO_TEMPLATE_CONTACT_CONFIRMATION
+      ? Number(process.env.BREVO_TEMPLATE_CONTACT_CONFIRMATION)
+      : undefined,
+
+    // Chaves legadas (mantidas temporariamente para compatibilidade em tempo de compilação)
     leadIngestSecret: process.env.LEAD_INGEST_SECRET,
     supabaseUrl: process.env.SUPABASE_URL,
     supabaseAnonKey: process.env.SUPABASE_ANON_KEY,
     supabaseEdgeFunctionUrl: process.env.SUPABASE_EDGE_FUNCTION_URL,
-    allowedOrigins: process.env.ALLOWED_ORIGINS,
   };
 }

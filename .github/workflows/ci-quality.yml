@@ -28,8 +28,8 @@ jobs:
       - name: Instalar dependências determinísticas
         run: npm ci
 
-      - name: Executar testes automatizados em memória (67 testes)
-        run: node --test "supabase/functions/receber-lead/tests/*.test.ts"
+      - name: Executar testes automatizados em memória (Brevo e CNPJ)
+        run: node --test "tests/*.test.ts"
 
   build-check:
     name: Verificação de Build de Produção
