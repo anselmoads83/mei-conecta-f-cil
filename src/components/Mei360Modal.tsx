@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef, useCallback, type FormEvent } from "react";
 import { Link } from "@tanstack/react-router";
-import { X, CheckCircle2, Info, ArrowRight } from "lucide-react";
+import { X, CheckCircle2, Info, ArrowRight, Lock } from "lucide-react";
 import logoMei360 from "@/assets/images/logo-mei-360.png";
 import { submitMei360Lead } from "@/lib/api/leads.functions";
+import { formatCnpj, validateCnpj } from "@/lib/cnpj";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface Mei360ModalProps {
   isOpen: boolean;
@@ -14,12 +16,14 @@ interface FormData {
   name: string;
   phone: string;
   email: string;
+  cnpj: string;
 }
 
 interface FormErrors {
   name?: string;
   phone?: string;
   email?: string;
+  cnpj?: string;
 }
 
 function formatBrazilianPhone(value: string): string {
@@ -52,7 +56,9 @@ export function Mei360Modal({ isOpen, onClose, origem }: Mei360ModalProps) {
     name: "",
     phone: "",
     email: "",
+    cnpj: "",
   });
+  const [acceptsMarketing, setAcceptsMarketing] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [submissionNotice, setSubmissionNotice] = useState<string | null>(null);
   const [submissionStatus, setSubmissionStatus] = useState<"idle" | "success" | "error">("idle");
@@ -63,6 +69,15 @@ export function Mei360Modal({ isOpen, onClose, origem }: Mei360ModalProps) {
   const previousFocusRef = useRef<HTMLElement | null>(null);
   const openedAtRef = useRef<number | null>(null);
   const isSubmittingRef = useRef(false);
+
+  const handleClose = useCallback(() => {
+    try {
+      sessionStorage.setItem("ad_mei360_dismissed", "true");
+    } catch {
+      // Ignora indisponibilidade de sessionStorage
+    }
+    onClose();
+  }, [onClose]);
 
   useEffect(() => {
     if (isOpen) {
@@ -94,22 +109,21 @@ export function Mei360Modal({ isOpen, onClose, origem }: Mei360ModalProps) {
         previousFocusRef.current?.focus();
       };
     }
-  }, [isOpen]);
-
-  const handleClose = useCallback(() => {
-    try {
-      sessionStorage.setItem("ad_mei360_dismissed", "true");
-    } catch {
-      // Ignora indisponibilidade de sessionStorage
-    }
-    onClose();
-  }, [onClose]);
+  }, [isOpen, handleClose]);
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = formatBrazilianPhone(e.target.value);
     setFormData((prev) => ({ ...prev, phone: formatted }));
     if (errors.phone) {
       setErrors((prev) => ({ ...prev, phone: undefined }));
+    }
+  };
+
+  const handleCnpjChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatCnpj(e.target.value);
+    setFormData((prev) => ({ ...prev, cnpj: formatted }));
+    if (errors.cnpj) {
+      setErrors((prev) => ({ ...prev, cnpj: undefined }));
     }
   };
 
@@ -133,6 +147,7 @@ export function Mei360Modal({ isOpen, onClose, origem }: Mei360ModalProps) {
 
     const newErrors: FormErrors = {};
 
+    // 1. Validação de Nome
     const trimmedName = formData.name.trim();
     if (!trimmedName) {
       newErrors.name = "Por favor, informe seu nome completo.";
@@ -142,6 +157,7 @@ export function Mei360Modal({ isOpen, onClose, origem }: Mei360ModalProps) {
       newErrors.name = "O nome não pode exceder 100 caracteres.";
     }
 
+    // 2. Validação de WhatsApp
     const trimmedPhone = formData.phone.trim();
     if (!trimmedPhone) {
       newErrors.phone = "Por favor, informe seu número de WhatsApp.";
@@ -149,6 +165,7 @@ export function Mei360Modal({ isOpen, onClose, origem }: Mei360ModalProps) {
       newErrors.phone = "Informe um número válido com DDD (ex: (11) 99999-9999).";
     }
 
+    // 3. Validação de E-mail
     const trimmedEmail = formData.email.trim();
     if (!trimmedEmail) {
       newErrors.email = "Por favor, informe seu e-mail.";
@@ -156,6 +173,14 @@ export function Mei360Modal({ isOpen, onClose, origem }: Mei360ModalProps) {
       newErrors.email = "Informe um endereço de e-mail válido.";
     } else if (trimmedEmail.length > 120) {
       newErrors.email = "O e-mail não pode exceder 120 caracteres.";
+    }
+
+    // 4. Validação de CNPJ do MEI (Obrigatório)
+    const trimmedCnpj = formData.cnpj.trim();
+    if (!trimmedCnpj) {
+      newErrors.cnpj = "Por favor, informe o CNPJ do seu MEI.";
+    } else if (!validateCnpj(trimmedCnpj)) {
+      newErrors.cnpj = "Informe um CNPJ válido com 14 dígitos (ex: 00.000.000/0000-00).";
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -175,12 +200,14 @@ export function Mei360Modal({ isOpen, onClose, origem }: Mei360ModalProps) {
           name: trimmedName,
           phone: trimmedPhone,
           email: trimmedEmail,
+          cnpj: trimmedCnpj,
+          consentimento_comunicados: acceptsMarketing,
           origem,
           elapsedMs,
         },
       });
 
-      if (result && result.ok === true && result.gravado === true && result.status === 201) {
+      if (result && result.ok === true && result.status === 201) {
         setSubmissionStatus("success");
         setSubmissionNotice(
           "Solicitação recebida com sucesso! Nossa equipe entrará em contato pelo seu WhatsApp com a avaliação do seu MEI 360°."
@@ -190,7 +217,8 @@ export function Mei360Modal({ isOpen, onClose, origem }: Mei360ModalProps) {
         } catch {
           // Ignora indisponibilidade de sessionStorage
         }
-        setFormData({ name: "", phone: "", email: "" });
+        setFormData({ name: "", phone: "", email: "", cnpj: "" });
+        setAcceptsMarketing(false);
         setErrors({});
       } else {
         if (result && !result.ok && result.fieldErrors) {
@@ -198,6 +226,7 @@ export function Mei360Modal({ isOpen, onClose, origem }: Mei360ModalProps) {
             name: result.fieldErrors.name,
             phone: result.fieldErrors.phone,
             email: result.fieldErrors.email,
+            cnpj: result.fieldErrors.cnpj,
           });
         }
         setSubmissionStatus("error");
@@ -372,9 +401,9 @@ export function Mei360Modal({ isOpen, onClose, origem }: Mei360ModalProps) {
                 </div>
               )}
 
-              {/* Formulário */}
+              {/* Formulário com 8 elementos na ordem visual exata do PDF */}
               <form onSubmit={handleSubmit} noValidate className="mt-4 sm:mt-5 space-y-3 sm:space-y-3.5">
-                {/* Nome Completo */}
+                {/* 1. Nome Completo */}
                 <div>
                   <label htmlFor="mei360-name" className="block text-xs font-semibold text-black mb-1">
                     Nome completo <span className="text-red-500">*</span>
@@ -389,14 +418,20 @@ export function Mei360Modal({ isOpen, onClose, origem }: Mei360ModalProps) {
                     onChange={(e) => handleChange("name", e)}
                     disabled={isSubmitting}
                     placeholder="Seu nome completo"
+                    aria-invalid={!!errors.name}
+                    aria-describedby={errors.name ? "mei360-name-error" : undefined}
                     className={`w-full px-3.5 py-2.5 rounded-xl border text-sm text-black placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#CBFF1F] focus:border-black transition-all ${
                       errors.name ? "border-red-500 bg-red-50/30" : "border-gray-300 bg-gray-50/50"
                     }`}
                   />
-                  {errors.name && <p className="text-[11px] text-red-600 mt-1 font-medium">{errors.name}</p>}
+                  {errors.name && (
+                    <p id="mei360-name-error" role="alert" className="text-[11px] text-red-600 mt-1 font-medium">
+                      {errors.name}
+                    </p>
+                  )}
                 </div>
 
-                {/* WhatsApp */}
+                {/* 2. WhatsApp com DDD */}
                 <div>
                   <label htmlFor="mei360-phone" className="block text-xs font-semibold text-black mb-1">
                     WhatsApp com DDD <span className="text-red-500">*</span>
@@ -411,14 +446,20 @@ export function Mei360Modal({ isOpen, onClose, origem }: Mei360ModalProps) {
                     disabled={isSubmitting}
                     placeholder="(11) 99999-9999"
                     maxLength={15}
+                    aria-invalid={!!errors.phone}
+                    aria-describedby={errors.phone ? "mei360-phone-error" : undefined}
                     className={`w-full px-3.5 py-2.5 rounded-xl border text-sm text-black placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#CBFF1F] focus:border-black transition-all ${
                       errors.phone ? "border-red-500 bg-red-50/30" : "border-gray-300 bg-gray-50/50"
                     }`}
                   />
-                  {errors.phone && <p className="text-[11px] text-red-600 mt-1 font-medium">{errors.phone}</p>}
+                  {errors.phone && (
+                    <p id="mei360-phone-error" role="alert" className="text-[11px] text-red-600 mt-1 font-medium">
+                      {errors.phone}
+                    </p>
+                  )}
                 </div>
 
-                {/* E-mail */}
+                {/* 3. E-mail */}
                 <div>
                   <label htmlFor="mei360-email" className="block text-xs font-semibold text-black mb-1">
                     E-mail <span className="text-red-500">*</span>
@@ -432,26 +473,68 @@ export function Mei360Modal({ isOpen, onClose, origem }: Mei360ModalProps) {
                     onChange={(e) => handleChange("email", e)}
                     disabled={isSubmitting}
                     placeholder="seuemail@exemplo.com.br"
+                    aria-invalid={!!errors.email}
+                    aria-describedby={errors.email ? "mei360-email-error" : undefined}
                     className={`w-full px-3.5 py-2.5 rounded-xl border text-sm text-black placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#CBFF1F] focus:border-black transition-all ${
                       errors.email ? "border-red-500 bg-red-50/30" : "border-gray-300 bg-gray-50/50"
                     }`}
                   />
-                  {errors.email && <p className="text-[11px] text-red-600 mt-1 font-medium">{errors.email}</p>}
+                  {errors.email && (
+                    <p id="mei360-email-error" role="alert" className="text-[11px] text-red-600 mt-1 font-medium">
+                      {errors.email}
+                    </p>
+                  )}
                 </div>
 
-                {/* Aviso LGPD / Política de Privacidade */}
-                <p className="text-[11px] text-[#6B7280] leading-snug pt-1">
-                  Seus dados estão protegidos e serão utilizados exclusivamente para realizar o atendimento da sua solicitação, em conformidade com nossa{" "}
-                  <Link
-                    to="/politica-de-privacidade"
-                    className="text-black font-semibold underline hover:text-[#4B5563]"
-                  >
-                    Política de Privacidade
-                  </Link>
-                  . Não emitimos diagnósticos automatizados instantâneos.
-                </p>
+                {/* 4. CNPJ do MEI (Obrigatório) */}
+                <div>
+                  <label htmlFor="mei360-cnpj" className="block text-xs font-semibold text-black mb-1">
+                    CNPJ do MEI <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    id="mei360-cnpj"
+                    name="cnpj"
+                    type="text"
+                    inputMode="numeric"
+                    required
+                    value={formData.cnpj}
+                    onChange={handleCnpjChange}
+                    disabled={isSubmitting}
+                    placeholder="00.000.000/0000-00"
+                    maxLength={18}
+                    aria-invalid={!!errors.cnpj}
+                    aria-describedby={errors.cnpj ? "mei360-cnpj-error" : undefined}
+                    className={`w-full px-3.5 py-2.5 rounded-xl border text-sm text-black placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#CBFF1F] focus:border-black transition-all ${
+                      errors.cnpj ? "border-red-500 bg-red-50/30" : "border-gray-300 bg-gray-50/50"
+                    }`}
+                  />
+                  {errors.cnpj && (
+                    <p id="mei360-cnpj-error" role="alert" className="text-[11px] text-red-600 mt-1 font-medium">
+                      {errors.cnpj}
+                    </p>
+                  )}
+                </div>
 
-                {/* Botão de Envio (CTA) */}
+                {/* 5. Checkbox Opcional de Comunicados */}
+                <div className="pt-1">
+                  <div className="flex items-start gap-2.5">
+                    <Checkbox
+                      id="mei360-consent"
+                      checked={acceptsMarketing}
+                      onCheckedChange={(checked) => setAcceptsMarketing(checked === true)}
+                      disabled={isSubmitting}
+                      className="h-[18px] w-[18px] rounded-[4px] border-2 border-gray-400 mt-0.5 data-[state=checked]:bg-[#CBFF1F] data-[state=checked]:border-black data-[state=checked]:text-black focus-visible:ring-2 focus-visible:ring-black cursor-pointer shrink-0"
+                    />
+                    <label
+                      htmlFor="mei360-consent"
+                      className="text-xs text-neutral-800 leading-snug cursor-pointer select-none font-normal"
+                    >
+                      Concordo em receber novidades e comunicados do Anselmo Dias Contador.
+                    </label>
+                  </div>
+                </div>
+
+                {/* 6. Botão de Envio (CTA) */}
                 <button
                   type="submit"
                   disabled={isSubmitting}
@@ -466,6 +549,28 @@ export function Mei360Modal({ isOpen, onClose, origem }: Mei360ModalProps) {
                     </>
                   )}
                 </button>
+
+                {/* 7. Cadeado + Mensagem de Privacidade Aprovada */}
+                <div className="flex items-start gap-2 pt-2">
+                  <Lock className="w-4 h-4 text-gray-500 flex-shrink-0 mt-0.5" aria-hidden="true" />
+                  <p className="text-[11px] text-[#6B7280] leading-snug">
+                    Seus dados são protegidos e utilizados para o atendimento da sua solicitação e, se autorizado, para o envio de novidades e comunicados, conforme nossa{" "}
+                    <Link
+                      to="/politica-de-privacidade"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-black font-semibold underline hover:text-[#4B5563]"
+                    >
+                      Política de Privacidade
+                    </Link>
+                    .
+                  </p>
+                </div>
+
+                {/* 8. Aviso Separado sobre Diagnóstico Não Instantâneo */}
+                <p className="text-[11px] text-[#6B7280] text-center pt-1">
+                  Não emitimos diagnósticos automatizados instantâneos.
+                </p>
               </form>
             </div>
           </div>
