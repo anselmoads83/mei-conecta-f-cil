@@ -8,8 +8,7 @@ import {
 } from "../leads.server";
 
 // Server Function do TanStack Start para envio seguro de leads do formulário de contato.
-// Toda a execução de `.handler` ocorre exclusivamente no servidor Node.js,
-// preservando LEAD_INGEST_SECRET fora do alcance do navegador.
+// Toda a execução de `.handler` ocorre exclusivamente no servidor Node.js.
 // O endpoint público aceita exclusivamente os campos do formulário e descarta
 // qualquer tentativa externa de controlar `validar_apenas`.
 
