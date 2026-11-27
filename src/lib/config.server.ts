@@ -22,12 +22,6 @@ export interface ServerConfig {
   brevoTemplateMei360Confirmation?: number;
   brevoTemplateContactInternal?: number;
   brevoTemplateContactConfirmation?: number;
-
-  // Legado / Transição (opcional, sem dependência operacional)
-  leadIngestSecret?: string;
-  supabaseUrl?: string;
-  supabaseAnonKey?: string;
-  supabaseEdgeFunctionUrl?: string;
 }
 
 export function getServerConfig(): ServerConfig {
@@ -54,11 +48,5 @@ export function getServerConfig(): ServerConfig {
     brevoTemplateContactConfirmation: process.env.BREVO_TEMPLATE_CONTACT_CONFIRMATION
       ? Number(process.env.BREVO_TEMPLATE_CONTACT_CONFIRMATION)
       : undefined,
-
-    // Chaves legadas (mantidas temporariamente para compatibilidade em tempo de compilação)
-    leadIngestSecret: process.env.LEAD_INGEST_SECRET,
-    supabaseUrl: process.env.SUPABASE_URL,
-    supabaseAnonKey: process.env.SUPABASE_ANON_KEY,
-    supabaseEdgeFunctionUrl: process.env.SUPABASE_EDGE_FUNCTION_URL,
   };
 }
