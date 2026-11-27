@@ -279,18 +279,8 @@ export function Mei360Modal({ isOpen, onClose, origem }: Mei360ModalProps) {
             <X className="w-5 h-5 stroke-[2.5]" aria-hidden="true" />
           </button>
 
-          {/* PAINEL ESQUERDO: Fundo Preto com Identidade MEI 360 */}
+          {/* PAINEL ESQUERDO: Fundo Preto com Identidade MEI 360 (preto absoluto uniforme #000000) */}
           <div className="w-full md:w-[45%] bg-[#000000] text-white p-6 sm:p-8 flex flex-col justify-between relative overflow-hidden flex-shrink-0">
-            {/* Decoração sutil de luz verde-limão */}
-            <div
-              className="absolute -top-24 -left-24 w-56 h-56 bg-[#CBFF1F]/15 rounded-full blur-3xl pointer-events-none"
-              aria-hidden="true"
-            />
-            <div
-              className="absolute -bottom-24 -right-24 w-56 h-56 bg-[#CBFF1F]/10 rounded-full blur-3xl pointer-events-none"
-              aria-hidden="true"
-            />
-
             <div className="relative z-10">
               {/* Logotipo Oficial MEI 360 */}
               <div className="w-full max-w-[260px] sm:max-w-[290px] mx-auto md:mx-0 mb-5 sm:mb-6">
